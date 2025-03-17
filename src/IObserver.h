@@ -13,7 +13,7 @@ class IObserver {
 public:
     virtual ~IObserver() = default;
 
-    virtual void Update(const String &value) = 0;
+    virtual void Update(const String &module_name, const String &value) = 0;
 };
 
 #endif //IOBSERVER_H

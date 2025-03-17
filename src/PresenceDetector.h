@@ -8,12 +8,14 @@
 #pragma once
 
 #include <Arduino.h>
+#include <LittleVector.h>
 #include <IModule.h>
 #include <IObservable.h>
 
 class PresenceDetector final: public IModule {
 protected:
     bool value;
+    LittleVector<IObserver*> i_observers = LittleVector<IObserver*>();
 
 public:
     ~PresenceDetector() override = default;
@@ -23,7 +25,7 @@ public:
 
     const void *getValueReference() override;
 
-    void Update(const ::String &value) override;
+    void Update(const String &module_name, const String &value) override;
 
     void Attach(::IObserver *observer) override;
 

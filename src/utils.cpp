@@ -120,3 +120,27 @@ const char* wl_status_to_string(const wl_status_t status) {
     }
     return "Invalid WL_STATUS";
 }
+
+bool fromBoolPtr(const void * reference) {
+    if (reference == nullptr) return false;
+    const auto value = static_cast<const bool*>(reference);
+    return *value;
+}
+
+float fromFloatPtr(const void * reference) {
+    if (reference == nullptr) return 0.0f;
+    const auto value = static_cast<const float*>(reference);
+    return *value;
+}
+
+String fromStringPtr(const void * reference) {
+    if (reference == nullptr) return "";
+    const auto value = static_cast<const char*>(reference);
+    return {value};
+}
+
+int fromIntPtr(const void * reference) {
+    if (reference == nullptr) return 0;
+    const auto value = static_cast<const int*>(reference);
+    return *value;
+}

@@ -48,7 +48,7 @@ class Application {
     static Application *getInstance();
     void brokerLoop() const;
     void startup();
-    void init(WiFiClient wifi);
+    void initialize(const WiFiClient& wifi);
     static void sensorLoop();
 };
 

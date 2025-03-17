@@ -9,7 +9,7 @@
 #include <Broker.h>
 #include <utils.h>
 
-Broker::Broker(WiFiClient network) {
+Broker::Broker(const WiFiClient& network) {
     this->wifi = network;
     this->mqtt = MQTTClient(512);
 }

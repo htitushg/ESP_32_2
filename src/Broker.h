@@ -16,7 +16,7 @@ class Broker {
     WiFiClient wifi;
     String root_topic;
 
-    explicit Broker(WiFiClient network);
+    explicit Broker(const WiFiClient& network);
 
   public:
     static Broker* newBroker(const WiFiClient &network, void cb(MQTTClient *client, char topic[], char bytes[], int length));

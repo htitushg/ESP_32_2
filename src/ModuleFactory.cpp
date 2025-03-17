@@ -14,8 +14,8 @@
 #include <TemperatureSensor.h>
 #include <ConsumptionSensor.h>
 
-IModule* ModuleFactory::newModule(Broker *broker, const void *ptr, const String& type) {
-    if (strCaseSensitiveCompare(type, LIGHT_CONTROLLER)) return new LightController(broker, ptr, false);
+IModule* ModuleFactory::newModule(Broker *broker, const String& type) {
+    if (strCaseSensitiveCompare(type, LIGHT_CONTROLLER)) return new LightController(broker, false);
     if (strCaseSensitiveCompare(type, LIGHT_SENSOR)) return new LightSensor(broker, false);
     if (strCaseSensitiveCompare(type, PRESENCE_DETECTOR)) return new PresenceDetector(broker, false);
     if (strCaseSensitiveCompare(type, LUMINOSITY_SENSOR)) return new LuminositySensor(broker, 0.0f);

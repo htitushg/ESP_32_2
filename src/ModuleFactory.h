@@ -12,7 +12,7 @@
 
 class ModuleFactory {
     public:
-        static IModule* newModule(Broker *broker, const void *ptr, const String& type);
+        static IModule* newModule(Broker *broker, const String& type);
 };
 
 

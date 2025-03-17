@@ -48,7 +48,7 @@ void setup() {
   //pinMode(LIGHT, OUTPUT);
 
   // Create Application
-  app->init(wifi);
+  app->initialize(wifi);
   app->startup();
 
   TaskHandle_t SensorLoopHandle;

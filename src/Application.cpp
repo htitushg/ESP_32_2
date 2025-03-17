@@ -8,9 +8,11 @@
 #include <environment.h>
 #include <utils.h>
 #include "Application.h"
+
+#include <LightController.h>
 #include <ModuleFactory.h>
 
-void Application::init(WiFiClient wifi) {
+void Application::initialize(const WiFiClient& wifi) {
 
   // DEBUG
   Serial.println("Initializing application...");
@@ -18,12 +20,18 @@ void Application::init(WiFiClient wifi) {
   this->network = wifi;
   this->broker = Broker::newBroker(this->network, Application::messageHandler);
   this->setRootTopic();
-  this->lightSensor = ModuleFactory::newModule(this->broker, nullptr, LIGHT_SENSOR);
-  this->luminositySensor = ModuleFactory::newModule(this->broker, nullptr, LUMINOSITY_SENSOR);
-  this->presenceDetector = ModuleFactory::newModule(this->broker, nullptr, PRESENCE_DETECTOR);
-  this->temperatureSensor = ModuleFactory::newModule(this->broker, nullptr, TEMPERATURE_SENSOR);
-  this->consumptionSensor = ModuleFactory::newModule(this->broker, nullptr, CONSUMPTION_SENSOR);
-  this->lightController = ModuleFactory::newModule(this->broker, this->luminositySensor->getValueReference(), LIGHT_CONTROLLER);
+  this->lightSensor = ModuleFactory::newModule(this->broker, LIGHT_SENSOR);
+  this->luminositySensor = ModuleFactory::newModule(this->broker, LUMINOSITY_SENSOR);
+  this->presenceDetector = ModuleFactory::newModule(this->broker, PRESENCE_DETECTOR);
+  this->temperatureSensor = ModuleFactory::newModule(this->broker, TEMPERATURE_SENSOR);
+  this->consumptionSensor = ModuleFactory::newModule(this->broker, CONSUMPTION_SENSOR);
+  this->lightController = ModuleFactory::newModule(this->broker, LIGHT_CONTROLLER);
+
+  // Add references to lightSensor and luminositySensor values to lightController
+  const auto* light_controller = dynamic_cast<LightController *>(this->lightController);
+  light_controller->addReference(new ValueReference(LIGHT_SENSOR, this->lightSensor->getValueReference()));
+  light_controller->addReference(new ValueReference(LUMINOSITY_SENSOR, this->luminositySensor->getValueReference()));
+
   this->presenceDetector->Attach(this->lightController);
 }
 
@@ -250,6 +258,9 @@ void Application::startup() {
 }
 
 void Application::unsubscribeAllTopics() const {
+
+  // TODO -> maybe return to setup here? Is it necessary?...
+  // if (this->broker == nullptr) return;
 
   // DEBUG
   Serial.println("Unsubscribing all topics...");
