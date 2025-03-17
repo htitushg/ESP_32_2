@@ -28,7 +28,7 @@ void Application::initialize(const WiFiClient& wifi) {
   this->lightController = ModuleFactory::newModule(this->broker, LIGHT_CONTROLLER);
 
   // Add references to lightSensor and luminositySensor values to lightController
-  const auto* light_controller = dynamic_cast<LightController *>(this->lightController);
+  const auto* light_controller = (LightController *)(this->lightController);
   light_controller->addReference(new ValueReference(LIGHT_SENSOR, this->lightSensor->getValueReference()));
   light_controller->addReference(new ValueReference(LUMINOSITY_SENSOR, this->luminositySensor->getValueReference()));
 

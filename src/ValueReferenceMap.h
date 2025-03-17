@@ -13,7 +13,7 @@ class ValueReferenceMap {
     public:
         LittleVector<ValueReference*> values = LittleVector<ValueReference*>();
 
-        ValueReferenceMap();
+        ValueReferenceMap() = default;
         ~ValueReferenceMap() = default;
 
         const void* getValue(String key_name);

@@ -19,7 +19,7 @@ class LightController final : public IModule {
     LittleVector<IObserver*> i_observers = LittleVector<IObserver*>();
 
   public:
-    ~LightController() override = delete;
+    ~LightController() override = default;
 
     LightController(Broker *broker, bool value);
 
