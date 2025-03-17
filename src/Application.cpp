@@ -1,29 +1,52 @@
 //
 // Created by thorgan on 3/16/25.
 //
+#pragma once
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <environment.h>
 #include <utils.h>
 #include "Application.h"
-#include <ApplicationInstance.h>
 #include <ModuleFactory.h>
 
 void Application::init(WiFiClient wifi) {
+
+  // DEBUG
+  Serial.println("Initializing application...");
+
   this->network = wifi;
   this->broker = Broker::newBroker(this->network, Application::messageHandler);
-  this->lightController = ModuleFactory::newModule(LIGHT_CONTROLLER);
-  this->lightSensor = ModuleFactory::newModule(LIGHT_SENSOR);
-  this->luminositySensor = ModuleFactory::newModule(LUMINOSITY_SENSOR);
-  this->presenceDetector = ModuleFactory::newModule(PRESENCE_DETECTOR);
-  this->temperatureSensor = ModuleFactory::newModule(TEMPERATURE_SENSOR);
-  this->consumptionSensor = ModuleFactory::newModule(CONSUMPTION_SENSOR);
+  this->setRootTopic();
+  this->lightSensor = ModuleFactory::newModule(this->broker, nullptr, LIGHT_SENSOR);
+  this->luminositySensor = ModuleFactory::newModule(this->broker, nullptr, LUMINOSITY_SENSOR);
+  this->presenceDetector = ModuleFactory::newModule(this->broker, nullptr, PRESENCE_DETECTOR);
+  this->temperatureSensor = ModuleFactory::newModule(this->broker, nullptr, TEMPERATURE_SENSOR);
+  this->consumptionSensor = ModuleFactory::newModule(this->broker, nullptr, CONSUMPTION_SENSOR);
+  this->lightController = ModuleFactory::newModule(this->broker, this->luminositySensor->getValueReference(), LIGHT_CONTROLLER);
+  this->presenceDetector->Attach(this->lightController);
 }
+
+void Application::setRootTopic() {
+
+  // DEBUG
+  Serial.println("Defining root topic...");
+
+  // Define the root_topic
+  this->root_topic = String(SYSTEM_NAME) + "/" + String(this->location) + "/" + String(this->locationID) + "/" + String(DEVICE_TYPE) + "/" + String(DEVICE_ID) + "/";
+
+  // Define the broker's root_topic
+  this->broker->setRootTopic(this->root_topic);
+
+  // DEBUG
+  Serial.printf("Root topic set at: %s\n", this->root_topic.c_str());
+}
+
+Application::Application() = default;
 
 void Application::messageHandler(MQTTClient *client, char topic[], char payload[], int length) {
 
-    Application *app = ApplicationInstance::getInstance();
+    Application *app = Application::getInstance();
 
     // Extract the module name from the topic
     const String channel = getChannelModule(topic);
@@ -103,6 +126,14 @@ void Application::onSetupMessage(char payload[]) {
       this->setupModule(module_name, module_value);
     }
 
+  	// DEBUG
+  	Serial.println("Unsubscribing temporary setup topic...");
+
+    this->broker->unsub(SETUP_TOPIC);
+
+    // Set the root topic with new values
+    this->setRootTopic();
+
     // DEBUG
     Serial.println("Completing setup...");
 
@@ -110,7 +141,7 @@ void Application::onSetupMessage(char payload[]) {
   }
 }
 
-void Application::setupModule(const char* name, const char* value) {
+void Application::setupModule(const char* name, const char* value) const {
 
   // DEBUG
   Serial.printf("Setting up module %s...\n", name);
@@ -128,15 +159,6 @@ void Application::startup() {
 
   // DEBUG
   Serial.println("Starting up...");
-
-  // DEBUG
-  Serial.println("Defining root topic...");
-
-  // Define the root_topic
-  this->root_topic = String(SYSTEM_NAME) + "/" + String(this->location) + "/" + String(this->locationID) + "/" + String(DEVICE_TYPE) + "/" + String(DEVICE_ID) + "/";
-
-  // DEBUG
-  Serial.printf("Root topic set at: %s\n", this->root_topic.c_str());
   Serial.println("Preparing startup message...");
 
   // Prepare startup message
@@ -200,25 +222,13 @@ void Application::startup() {
   // DEBUG
   Serial.println("Subscribing to temporary setup channel...");
 
-  // Subscribe to temporary `/setup` channel
-  const String SETUP_CHANNEL_DURING_STARTUP = root_topic + String(SETUP_TOPIC);
-
-  // DEBUG
-  Serial.printf("Temporary setup channel set at %s\n", SETUP_CHANNEL_DURING_STARTUP.c_str());
-
-  this->broker->sub(SETUP_CHANNEL_DURING_STARTUP);
+  this->broker->sub(SETUP_TOPIC);
   this->wait_for_setup = true;
 
   // DEBUG
-  Serial.println("Publishing to startup channel...");
+  Serial.println("Publishing to startup topic...");
 
-  // Send `/startup` message to MQTT Broker
-  this->startup_channel = this->root_topic + String(STARTUP_TOPIC);
-
-  // DEBUG
-  Serial.printf("Startup channel set at %s\n", this->startup_channel.c_str());
-
-  this->broker->pub(this->startup_channel, messageBuffer);
+  this->broker->pub(STARTUP_TOPIC, messageBuffer);
 
   // DEBUG
   Serial.println("Waiting for setup message...");
@@ -227,50 +237,30 @@ void Application::startup() {
   while (this->wait_for_setup) { this->broker->loop(); }
 
   // DEBUG
-  Serial.println("Unsubscribing temporary setup channel...");
+  Serial.println("Subscribing to topics...");
 
-  // Unsubscribe temporary SETUP channel
-  this->broker->unsub(SETUP_CHANNEL_DURING_STARTUP);
-
-  // DEBUG
-  Serial.println("Setting up channel names...");
-
-  // Set MQTT channels and other variables
-  this->startup_channel = this->root_topic + String(STARTUP_TOPIC);
-  this->setup_channel = this->root_topic + String(SETUP_TOPIC);
-  this->reset_channel = this->root_topic + String(RESET_TOPIC);
-  this->light_controller_channel = this->root_topic + String(LIGHT_CONTROLLER);
-  this->light_sensor_channel = this->root_topic + String(LIGHT_SENSOR);
-  this->luminosity_sensor_channel = this->root_topic + String(LUMINOSITY_SENSOR);
-  this->presence_detector_channel = this->root_topic + String(PRESENCE_DETECTOR);
-  this->temperature_sensor_channel = this->root_topic + String(TEMPERATURE_SENSOR);
-  this->consumption_sensor_channel = this->root_topic + String(CONSUMPTION_SENSOR);
-
-  // DEBUG
-  Serial.println("Subscribing to channels...");
-
-  // Subscribe to MQTT channels
-  this->broker->sub(this->reset_channel);
-  this->broker->sub(this->light_controller_channel);
-  this->broker->sub(this->light_sensor_channel);
-  this->broker->sub(this->luminosity_sensor_channel);
-  this->broker->sub(this->presence_detector_channel);
-  this->broker->sub(this->temperature_sensor_channel);
-  this->broker->sub(this->consumption_sensor_channel);
+  // Subscribe to MQTT topics
+  this->broker->sub(RESET_TOPIC);
+  this->broker->sub(LIGHT_CONTROLLER);
+  this->broker->sub(LIGHT_SENSOR);
+  this->broker->sub(LUMINOSITY_SENSOR);
+  this->broker->sub(PRESENCE_DETECTOR);
+  this->broker->sub(TEMPERATURE_SENSOR);
+  this->broker->sub(CONSUMPTION_SENSOR);
 }
 
-void Application::unsubscribeAllTopics() {
+void Application::unsubscribeAllTopics() const {
 
   // DEBUG
-  Serial.println("Unsubscribing all channels...");
+  Serial.println("Unsubscribing all topics...");
 
-  this->broker->unsub(reset_channel);
-  this->broker->unsub(light_controller_channel);
-  this->broker->unsub(light_sensor_channel);
-  this->broker->unsub(luminosity_sensor_channel);
-  this->broker->unsub(presence_detector_channel);
-  this->broker->unsub(temperature_sensor_channel);
-  this->broker->unsub(consumption_sensor_channel);
+  this->broker->unsub(RESET_TOPIC);
+  this->broker->unsub(LIGHT_CONTROLLER);
+  this->broker->unsub(LIGHT_SENSOR);
+  this->broker->unsub(LUMINOSITY_SENSOR);
+  this->broker->unsub(PRESENCE_DETECTOR);
+  this->broker->unsub(TEMPERATURE_SENSOR);
+  this->broker->unsub(CONSUMPTION_SENSOR);
 }
 
 void Application::reset() {
@@ -285,7 +275,14 @@ void Application::reset() {
   this->startup();
 }
 
-void Application::brokerLoop() {
+Application *Application::app = nullptr;
+
+Application * Application::getInstance() {
+    if (app == nullptr) return new Application();
+    return app;
+}
+
+void Application::brokerLoop() const {
   this->broker->loop();
 }
 
@@ -299,7 +296,7 @@ void Application::sensorLoop() {
   delay(500);
 }
 
-// TODO -> remove this function (was only to debug connections)
+// FIXME/TODO -> remove this function (was only to debug connections)
 //void Application::MQTTLoop( void * parameter) {
 //  for(;;) {
 //    this->broker->loop();

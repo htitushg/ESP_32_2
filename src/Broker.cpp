@@ -2,6 +2,7 @@
 // Created by thorgan on 3/15/25.
 //
 #pragma once
+
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <environment.h>
@@ -13,7 +14,11 @@ Broker::Broker(WiFiClient network) {
     this->mqtt = MQTTClient(512);
 }
 
-Broker* Broker::newBroker(WiFiClient network, std::function<void(MQTTClient *client, char topic[], char bytes[], int length)> cb) {
+void Broker::setRootTopic(const String &topic) {
+  	this->root_topic = topic;
+}
+
+Broker* Broker::newBroker(const WiFiClient& network, void cb(MQTTClient *client, char topic[], char bytes[], int length)) {
     Broker* broker = new Broker(network);
 
     // DEBUG
@@ -42,7 +47,7 @@ Broker* Broker::newBroker(WiFiClient network, std::function<void(MQTTClient *cli
 
         // DEBUG
         Serial.printf("%s - MQTT broker Timeout!\n", DEVICE_ID);
-        exit(1);
+        // TODO -> reset the device here?
     }
 
     // DEBUG
@@ -51,7 +56,10 @@ Broker* Broker::newBroker(WiFiClient network, std::function<void(MQTTClient *cli
     return broker;
 }
 
-void Broker::sub(const String &topic) {
+void Broker::sub(const String &module_name) {
+
+  	const String topic = this->root_topic + module_name;
+
     if (this->mqtt.subscribe(topic, QOS)) {
 
         // DEBUG
@@ -66,7 +74,9 @@ void Broker::sub(const String &topic) {
     Serial.println(topic);
 }
 
-void Broker::pub(const String &topic, const String &value) {
+void Broker::pub(const String &module_name, const String &value) {
+
+  	const String topic = this->root_topic + module_name;
 
     // DEBUG
     Serial.printf("Connection to MQTT: %hhd\n", this->mqtt.connected());
@@ -78,10 +88,12 @@ void Broker::pub(const String &topic, const String &value) {
     this->mqtt.publish(topic.c_str(), value.c_str(), RETAIN, QOS);
 }
 
-void Broker::unsub(const String &topic) {
+void Broker::unsub(const String &module_name) {
+
+  const String topic = this->root_topic + module_name;
 
   // DEBUG
-  Serial.printf("Unsubscribing from channel: %s\n", topic.c_str());
+  Serial.printf("Unsubscribing from topic: %s\n", topic.c_str());
 
   this->mqtt.unsubscribe(topic);
 }

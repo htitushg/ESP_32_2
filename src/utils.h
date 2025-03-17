@@ -5,6 +5,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#pragma once
+
 #include <Arduino.h>
 #include <WiFi.h>
 

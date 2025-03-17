@@ -1,25 +1,24 @@
 //
-// Created by thorgan on 3/16/25.
+// Created by thorgan on 3/17/25.
 //
 
-#ifndef LIGHTCONTROLLER_H
-#define LIGHTCONTROLLER_H
+#ifndef CONSUMPTIONSENSOR_H
+#define CONSUMPTIONSENSOR_H
 
 #pragma once
 
 #include <Arduino.h>
 #include <IModule.h>
+#include <IObservable.h>
 
-class LightController final : public IModule {
-  protected:
-    const bool *is_presence;
-    bool value;
+class ConsumptionSensor final: public IModule {
+protected:
+    float value;
 
-  public:
-    ~LightController() override = default;
-    LightController(Broker *broker, const void *isPresence, bool value);
+public:
+    ~ConsumptionSensor() override = default;
+    ConsumptionSensor(Broker *broker, float value);
     void setValue(const char * value) override;
-
     const String getValue() override;
 
     const void *getValueReference() override;
@@ -33,4 +32,5 @@ class LightController final : public IModule {
     void Notify() override;
 };
 
-#endif //LIGHTCONTROLLER_H
+
+#endif //CONSUMPTIONSENSOR_H

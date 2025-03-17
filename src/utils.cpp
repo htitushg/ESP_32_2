@@ -25,7 +25,7 @@ String millisToDate() {
             daysMsg = String(days) + " days ";
         }
     }
-    sprintf(buffer, "%s%02d:%02d:%02d", daysMsg, hours, minutes, seconds);
+    sprintf(buffer, "%s%02d:%02d:%02d", daysMsg.c_str(), hours, minutes, seconds);
     return {buffer};
 }
 

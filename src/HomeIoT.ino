@@ -2,9 +2,8 @@
 #include <WiFi.h>
 #include <environment.h>
 #include <Application.h>
-#include <ApplicationInstance.h>
 
-Application *app = ApplicationInstance::getInstance();
+Application *app = Application::getInstance();
 
 void sensorLoop(void *) {
   while (true) {

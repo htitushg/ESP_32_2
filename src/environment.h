@@ -4,6 +4,8 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#pragma once
+
 // #################################
 // #  Specific device's constants  #
 // #################################

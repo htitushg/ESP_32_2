@@ -5,14 +5,17 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#pragma once
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <environment.h>
 #include <Broker.h>
-#include <Module.h>
+#include <IModule.h>
 
 class Application {
   protected:
+    static Application *app;
     String location = DEFAULT_LOCATION;
     unsigned int locationID = DEFAULT_LOCATION_ID;
     String root_topic;
@@ -23,36 +26,27 @@ class Application {
     unsigned int publish_interval = 10000;
     unsigned long lastPublishTime = 0;
 
-	// Complete channel names
-    String startup_channel;
-	String setup_channel;
-    String reset_channel;
-    String light_controller_channel;
-    String light_sensor_channel;
-    String luminosity_sensor_channel;
-    String presence_detector_channel;
-    String temperature_sensor_channel;
-    String consumption_sensor_channel;
-
     WiFiClient network;
-    Broker *broker;
-    Module *lightController;
-    Module *lightSensor;
-    Module *luminositySensor;
-    Module *presenceDetector;
-    Module *temperatureSensor;
-    Module *consumptionSensor;
+    Broker *broker = nullptr;
+    IModule *lightController = nullptr;
+    IModule *lightSensor = nullptr;
+    IModule *luminositySensor = nullptr;
+    IModule *presenceDetector = nullptr;
+    IModule *temperatureSensor = nullptr;
+    IModule *consumptionSensor = nullptr;
 
-    bool isWaitingForSetup() { return this->wait_for_setup; }
+    bool isWaitingForSetup() const { return this->wait_for_setup; }
     void onSetupMessage(char payload[]);
     void reset();
-    void setupModule(const char* name, const char* value);
+    void setupModule(const char* name, const char* value) const;
 	static void messageHandler(MQTTClient *client, char topic[], char payload[], int length);
-    void unsubscribeAllTopics();
+    void unsubscribeAllTopics() const;
+    void setRootTopic();
+    Application();
 
   public:
-    Application();
-    void brokerLoop();
+    static Application *getInstance();
+    void brokerLoop() const;
     void startup();
     void init(WiFiClient wifi);
     static void sensorLoop();

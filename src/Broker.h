@@ -5,6 +5,8 @@
 #ifndef BROKER_H
 #define BROKER_H
 
+#pragma once
+
 #include <MQTTClient.h>
 #include <WiFi.h>
 
@@ -12,17 +14,17 @@ class Broker {
   protected:
     MQTTClient mqtt;
     WiFiClient wifi;
+    String root_topic;
 
-    Broker(WiFiClient network);
+    explicit Broker(WiFiClient network);
 
   public:
-    static Broker* newBroker(WiFiClient network, std::function<void(MQTTClient *client, char topic[], char bytes[], int length)> cb);
-    void sub(const String &topic);
-    void pub(const String &topic, const String &value);
-    void unsub(const String &topic);
+    static Broker* newBroker(const WiFiClient &network, void cb(MQTTClient *client, char topic[], char bytes[], int length));
+    void sub(const String &module_name);
+    void pub(const String &module_name, const String &value);
+    void unsub(const String &module_name);
+    void setRootTopic(const String &topic);
     void loop();
 };
-//void setupModule(const char* name, const char* value);
-//void messageHandler(MQTTClient *client, char topic[], char payload[], int length);
 
 #endif //BROKER_H
