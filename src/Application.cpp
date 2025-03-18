@@ -16,7 +16,7 @@ void Application::initialize(const WiFiClient &wifi) {
     Serial.println("Initializing application...");
 
     this->a_network = wifi;
-    this->a_broker.reset(Broker::newBroker(this->a_network, Application::messageHandler));
+    this->a_broker = Broker::newBroker(& this->a_network, Application::messageHandler);
     this->setRootTopic();
 
     this->a_modules[light_controller].reset(ModuleFactory::newModule(this->a_broker.get(), LIGHT_CONTROLLER));

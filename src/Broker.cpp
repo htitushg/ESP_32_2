@@ -8,8 +8,8 @@
 #include <Broker.h>
 #include <utils.h>
 
-Broker::Broker(const WiFiClient& network) {
-    this->a_wifi = network;
+Broker::Broker(WiFiClient * network) {
+    this->a_wifi.reset(network);
     this->a_mqtt = MQTTClient(512);
 }
 
@@ -17,14 +17,15 @@ void Broker::setRootTopic(const String &topic) {
   	this->a_root_topic = topic;
 }
 
-Broker* Broker::newBroker(const WiFiClient& network, void cb(MQTTClient *client, char topic[], char bytes[], int length)) {
-    Broker* broker = new Broker(network);
+std::shared_ptr<Broker> Broker::newBroker(WiFiClient * network, void cb(MQTTClient *client, char topic[], char bytes[], int length)) {
+    std::shared_ptr<Broker> broker;
+    broker.reset(new Broker(network));
 
     // DEBUG
     Serial.println("Starting MQTT connection...");
 
     // Connect to the MQTT broker
-    broker->a_mqtt.begin(MQTT_BROKER_ADDRESS, MQTT_PORT, broker->a_wifi);
+    broker->a_mqtt.begin(MQTT_BROKER_ADDRESS, MQTT_PORT, * broker->a_wifi);
 
     // Create a handler for incoming messages
     broker->a_mqtt.onMessageAdvanced(cb);
@@ -59,6 +60,9 @@ void Broker::sub(const String &module_name) {
 
   	const String topic = this->a_root_topic + module_name;
 
+    // DEBUG
+    Serial.printf("Subscribing to topic %s with QoS %d\n", topic.c_str(), QOS);
+
     if (this->a_mqtt.subscribe(topic, QOS)) {
 
         // DEBUG
@@ -83,6 +87,8 @@ void Broker::pub(const String &module_name, const String &value) {
     Serial.printf("| %s - published to MQTT:\n", DEVICE_ID);
     Serial.printf("|====-> topic: %s\n", topic.c_str());
     Serial.printf("|====-> payload: %s\n\n", value.c_str());
+    Serial.printf("|====-> retain: %hhd\n", RETAIN);
+    Serial.printf("|====-> QoS: %d\n\n", QOS);
 
     this->a_mqtt.publish(topic.c_str(), value.c_str(), RETAIN, QOS);
 }

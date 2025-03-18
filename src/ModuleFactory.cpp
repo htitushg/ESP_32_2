@@ -23,5 +23,9 @@ IModule * ModuleFactory::newModule(Broker *broker, const String& type) {
     if (strCaseSensitiveCompare(type, LUMINOSITY_SENSOR)) return new LuminositySensor(broker, 0.0f);
     if (strCaseSensitiveCompare(type, TEMPERATURE_SENSOR)) return new TemperatureSensor(broker, 0.0f);
     if (strCaseSensitiveCompare(type, CONSUMPTION_SENSOR)) return new ConsumptionSensor(broker, 0.0f);
+
+    // DEBUG
+    Serial.printf("Received unknown module type %s... :/\n", type.c_str());
+
     throw std::invalid_argument( "received invalid module type" );
 }

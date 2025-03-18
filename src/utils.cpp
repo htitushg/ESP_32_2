@@ -45,23 +45,28 @@ String getChannelModule(char *topic) {
 }
 
 bool strCaseInsensitiveCompare(const String& str, const char chars[]) {
-    constexpr size_t str_len = sizeof(str) / sizeof(str[0]);
-    const size_t chars_len = strlen(chars);
-    if (chars_len != str_len) return false;
 
-    for (int i = 0; i < str_len; i++) {
-        if (toUpperCase(str[i]) != toUpperCase(chars[i])) return false;
+    // DEBUG
+    Serial.printf("strCaseInsensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
+
+    const auto str1 = std::string(str.c_str());
+    const auto str2 = std::string(chars);
+
+    if (str1.length() != str2.length()) return false;
+
+    for (int i = 0; i < str1.length(); i++) {
+        if (toupper(str1[i]) != toupper(str2[i])) return false;
     }
 
     return true;
 }
 
 bool strCaseSensitiveCompare(const String& str, const char chars[]) {
-    constexpr size_t str_len = sizeof(str) / sizeof(str[0]);
-    const size_t chars_len = strlen(chars);
-    if (chars_len != str_len) return false;
 
-    return str == chars;
+    // DEBUG
+    Serial.printf("strCaseSensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
+
+    return strcmp(str.c_str(), chars) == 0;
 }
 
 int parseInt(const String& str) {
