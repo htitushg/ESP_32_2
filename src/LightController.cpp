@@ -2,20 +2,22 @@
 // Created by thorgan on 3/16/25.
 //
 
-#pragma once
-
 #include "LightController.h"
 #include <environment.h>
 #include <utils.h>
 
 LightController::LightController(Broker *broker, const bool value) {
-	this->ref_values = new ValueReferenceMap();
-  	this->broker = broker;
-	this->value = value;
+
+	// DEBUG
+	Serial.printf("Creating LightController with value: %hhd\n", value);
+
+	this->a_ref_values = std::map<std::string, MyAny>();
+  	this->a_broker = broker;
+	this->a_value = value;
 }
 
-void LightController::addReference(ValueReference *reference) const {
-	this->ref_values->add(reference->getKey(), reference->getValue());
+void LightController::addReference(MyAny value, String module_name) {
+	this->a_ref_values[std::string(module_name.c_str())] = value;
 }
 
 void LightController::setValue(const char * value) {
@@ -23,10 +25,10 @@ void LightController::setValue(const char * value) {
       	const bool position = parseBool(value);
 
     	// Ignore repeated values
-  		if (this->value == position) return;
+  		if (this->a_value == position) return;
 
-  		this->value = position;
-  		if (this->value) {
+  		this->a_value = position;
+  		if (this->a_value) {
     		digitalWrite(LIGHT, HIGH);
   		} else {
     		digitalWrite(LIGHT, LOW);
@@ -34,7 +36,7 @@ void LightController::setValue(const char * value) {
 
 		this->Notify();
 
-  		this->broker->pub(this->name, String(position ? "True" : "False"));
+  		this->a_broker->pub(this->a_name, String(position ? "True" : "False"));
       	return;
 	}
 
@@ -42,30 +44,34 @@ void LightController::setValue(const char * value) {
     Serial.printf("invalid value: %s\n", value);
 }
 
-const String LightController::getValue() {
-  return toString(this->value);
+const String LightController::getValue() const {
+  return toString(this->a_value);
 }
 
-const void *LightController::getValueReference() {
-	return &this->value;
+const MyAny LightController::getValueReference() const {
+	return * new MyAny((void *) & this->a_value, "bool");
 }
 
-float LightController::getLuminosity() const {
+const float LightController::getLuminosity() const {
 
 	// Return nullptr if not found
-	const auto val = this->ref_values->getValue(LUMINOSITY_SENSOR);
+	const MyAny val = this->a_ref_values.at(std::string(LUMINOSITY_SENSOR));
 
-	// Return false if val == nullptr
-	return fromFloatPtr(val);
+	const float * value = (const float *) val;
+	if (value == nullptr) return 0.0f;
+
+	return * value;
 }
 
-bool LightController::getLightState() const {
+const bool LightController::getLightState() const {
 
 	// Return nullptr if not found
-	const auto val = this->ref_values->getValue(LIGHT_SENSOR);
+	const MyAny val = this->a_ref_values.at(std::string(LIGHT_SENSOR));
 
-	// Return 0.0f if val == nullptr
-	return fromBoolPtr(val);
+	const bool * value = (const bool *) val;
+	if (value == nullptr) return false;
+
+	return * value;
 }
 
 void LightController::Update(const String &module_name, const String &value) {
@@ -79,21 +85,21 @@ void LightController::Update(const String &module_name, const String &value) {
 }
 
 void LightController::Attach(IObserver *observer) {
-	this->i_observers.push_back(observer);
+	this->a_observers.push_back(observer);
 }
 
 void LightController::Detach(IObserver *observer) {
-	for (auto itr = this->i_observers.begin(); itr != this->i_observers.end();)
+	for (auto itr = this->a_observers.begin(); itr != this->a_observers.end();)
 	{
 		if (*itr == observer)
-			itr = this->i_observers.erase(itr);
+			itr = this->a_observers.erase(itr);
 		else
 			++itr;
 	}
 }
 
 void LightController::Notify() {
-	for (IObserver* observer : this->i_observers) {
+	for (IObserver* observer : this->a_observers) {
 		observer->Update(LIGHT_CONTROLLER, this->getValue());
 	}
 }

@@ -3,7 +3,7 @@
 #include <environment.h>
 #include <Application.h>
 
-Application *app = Application::getInstance();
+std::shared_ptr<Application> app = Application::getInstance();
 
 void sensorLoop(void *) {
   while (true) {

@@ -2,61 +2,63 @@
 // Created by thorgan on 3/17/25.
 //
 
-#pragma once
-
 #include "LuminositySensor.h"
 #include <environment.h>
 #include <utils.h>
 
-LuminositySensor::LuminositySensor(Broker *broker, const float value){
-    this->broker = broker;
-    this->value = value;
+LuminositySensor::LuminositySensor(Broker *broker, const float value) {
+
+    // DEBUG
+    Serial.printf("Creating LuminositySensor with value: %f\n", value);
+
+    this->a_broker = broker;
+    this->a_value = value;
 }
 
 void LuminositySensor::setValue(const char * value) {
     const float position = parseFloat(value);
 
     // Ignore repeated values
-    if (this->value == position) return;
+    if (this->a_value == position) return;
 
     this->Notify();
 
     // TODO -> implement lightSensor logic when changing position
 
-    this->broker->pub(this->name, toString(position));
+    this->a_broker->pub(this->a_name, toString(position));
     return;
 
     // DEBUG
     Serial.printf("invalid value: %s\n", value);
 }
 
-const String LuminositySensor::getValue(){
-    return toString(this->value);
+const String LuminositySensor::getValue() const {
+    return toString(this->a_value);
 }
 
-const void *LuminositySensor::getValueReference() {
-  return &this->value;
+const MyAny LuminositySensor::getValueReference() const {
+	return * new MyAny((void *) & this->a_value, "float");
 }
 
 void LuminositySensor::Update(const String &module_name, const String &value) {
 }
 
 void LuminositySensor::Attach(IObserver *observer) {
-    this->i_observers.push_back(observer);
+    this->a_observers.push_back(observer);
 }
 
 void LuminositySensor::Detach(IObserver *observer) {
-    for (auto itr = this->i_observers.begin(); itr != this->i_observers.end();)
+    for (auto itr = this->a_observers.begin(); itr != this->a_observers.end();)
     {
         if (*itr == observer)
-            itr = this->i_observers.erase(itr);
+            itr = this->a_observers.erase(itr);
         else
             ++itr;
     }
 }
 
 void LuminositySensor::Notify() {
-    for (IObserver* observer : this->i_observers) {
+    for (IObserver* observer : this->a_observers) {
         observer->Update(LUMINOSITY_SENSOR, this->getValue());
     }
 }

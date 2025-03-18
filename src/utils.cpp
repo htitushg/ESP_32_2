@@ -1,7 +1,6 @@
 //
 // Created by thorgan on 3/15/25.
 //
-#pragma once
 
 #include <Arduino.h>
 #include <utils.h>

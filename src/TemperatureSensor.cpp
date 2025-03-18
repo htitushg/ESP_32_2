@@ -2,61 +2,63 @@
 // Created by thorgan on 3/17/25.
 //
 
-#pragma once
-
 #include "TemperatureSensor.h"
 #include <environment.h>
 #include <utils.h>
 
-TemperatureSensor::TemperatureSensor(Broker *broker, const float value){
-    this->broker = broker;
-    this->value = value;
+TemperatureSensor::TemperatureSensor(Broker *broker, const float value) {
+
+    // DEBUG
+    Serial.printf("Creating TemperatureSensor with value: %f\n", value);
+
+    this->a_broker = broker;
+    this->a_value = value;
 }
 
 void TemperatureSensor::setValue(const char * value) {
     const float position = parseFloat(value);
 
     // Ignore repeated values
-    if (this->value == position) return;
+    if (this->a_value == position) return;
 
     this->Notify();
 
     // TODO -> implement lightSensor logic when changing position
 
-    this->broker->pub(this->name, toString(position));
+    this->a_broker->pub(this->a_name, toString(position));
     return;
 
     // DEBUG
     Serial.printf("invalid value: %s\n", value);
 }
 
-const String TemperatureSensor::getValue(){
-    return toString(this->value);
+const String TemperatureSensor::getValue() const {
+    return toString(this->a_value);
 }
 
-const void *TemperatureSensor::getValueReference() {
-  return &this->value;
+const MyAny TemperatureSensor::getValueReference() const {
+	return * new MyAny((void *) & this->a_value, "float");
 }
 
 void TemperatureSensor::Update(const String &module_name, const String &value) {
 }
 
 void TemperatureSensor::Attach(IObserver *observer) {
-    this->i_observers.push_back(observer);
+    this->a_observers.push_back(observer);
 }
 
 void TemperatureSensor::Detach(IObserver *observer) {
-    for (auto itr = this->i_observers.begin(); itr != this->i_observers.end();)
+    for (auto itr = this->a_observers.begin(); itr != this->a_observers.end();)
     {
         if (*itr == observer)
-            itr = this->i_observers.erase(itr);
+            itr = this->a_observers.erase(itr);
         else
             ++itr;
     }
 }
 
 void TemperatureSensor::Notify() {
-    for (IObserver* observer : this->i_observers) {
+    for (IObserver* observer : this->a_observers) {
         observer->Update(TEMPERATURE_SENSOR, this->getValue());
     }
 }

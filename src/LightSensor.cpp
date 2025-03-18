@@ -7,11 +7,13 @@
 #include <environment.h>
 #include <utils.h>
 
-#pragma once
+LightSensor::LightSensor(Broker *broker, const bool value) {
 
-LightSensor::LightSensor(Broker *broker, const bool value){
-    this->broker = broker;
-    this->value = value;
+    // DEBUG
+    Serial.printf("Creating LightSensor with value: %hhd\n", value);
+
+    this->a_broker = broker;
+    this->a_value = value;
 }
 
 void LightSensor::setValue(const char * value) {
@@ -19,13 +21,13 @@ void LightSensor::setValue(const char * value) {
         const bool position = parseBool(value);
 
         // Ignore repeated values
-        if (this->value == position) return;
+        if (this->a_value == position) return;
 
         this->Notify();
 
         // TODO -> implement lightSensor logic when changing position
 
-        this->broker->pub(this->name, String(position ? "True" : "False"));
+        this->a_broker->pub(this->a_name, String(position ? "True" : "False"));
         return;
     }
 
@@ -33,12 +35,12 @@ void LightSensor::setValue(const char * value) {
     Serial.printf("invalid value: %s\n", value);
 }
 
-const String LightSensor::getValue(){
-    return toString(this->value);
+const String LightSensor::getValue() const {
+    return toString(this->a_value);
 }
 
-const void *LightSensor::getValueReference() {
-    return &this->value;
+const MyAny LightSensor::getValueReference() const {
+	return * new MyAny((void *) & this->a_value, "bool");
 }
 
 void LightSensor::Update(const String &module_name, const String &value) {
@@ -46,21 +48,21 @@ void LightSensor::Update(const String &module_name, const String &value) {
 }
 
 void LightSensor::Attach(IObserver *observer) {
-    this->i_observers.push_back(observer);
+    this->a_observers.push_back(observer);
 }
 
 void LightSensor::Detach(IObserver *observer) {
-    for (auto itr = this->i_observers.begin(); itr != this->i_observers.end();)
+    for (auto itr = this->a_observers.begin(); itr != this->a_observers.end();)
     {
         if (*itr == observer)
-            itr = this->i_observers.erase(itr);
+            itr = this->a_observers.erase(itr);
         else
             ++itr;
     }
 }
 
 void LightSensor::Notify() {
-    for (IObserver* observer : this->i_observers) {
+    for (IObserver* observer : this->a_observers) {
         observer->Update(LIGHT_SENSOR, this->getValue());
     }
 }
