@@ -6,6 +6,7 @@
 #define APPLICATION_H
 
 #include <Arduino.h>
+#include <nlohmann/json.hpp>
 #include <WiFi.h>
 #include <environment.h>
 #include <Broker.h>
@@ -14,9 +15,9 @@
 class Application {
   protected:
     static std::shared_ptr<Application> app;
-    String a_location = DEFAULT_LOCATION;
+    std::string  a_location = DEFAULT_LOCATION;
     unsigned int a_locationID = DEFAULT_LOCATION_ID;
-    String a_root_topic;
+    std::string  a_root_topic;
 
 	// Setup variable (used to synchronize the main loop with the MQTT message handler at setup)
     bool a_wait_for_setup = false;
@@ -38,20 +39,24 @@ class Application {
     };
 
     bool isWaitingForSetup() const { return this->a_wait_for_setup; }
-    void onSetupMessage(std::string & payload);
+    void onSetupMessage(const std::string & payload);
     void reset();
-    void setupModule(const char* name, const char* value) const;
-	static void messageHandler(MQTTClient *client, char topic[], char payload[], int length);
+    void setupModule(nlohmann::json & module) const;
+	static void messageHandler(MQTTClient * client, char topic[], char payload[], int length);
     void unsubscribeAllTopics() const;
     void setRootTopic();
     Application();
 
   public:
     static std::shared_ptr<Application> getInstance();
+
+    const unsigned long getLastPublishedTime() const { return a_lastPublishTime; }
+    const unsigned int getPublishInterval() const { return a_publish_interval; }
+
+    void sensorLoop();
     void brokerLoop() const;
     void startup();
     void initialize(const WiFiClient& wifi);
-    static void sensorLoop();
 };
 
 #endif //APPLICATION_H

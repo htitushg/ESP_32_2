@@ -11,7 +11,7 @@ class MyAny {
 
 private:
     void * a_value;
-    String a_type;
+    std::string a_type;
 
 public:
     operator int * () {
@@ -50,21 +50,23 @@ public:
         }
         return nullptr;
     };
-    operator String * () {
-        if (a_type == "String") {
-            return (String *)a_value;
+    operator std::string * () {
+        if (a_type == "std::string") {
+            return (std::string *)a_value;
         }
         return nullptr;
     };
-    operator const String * () const {
-        if (a_type == "String") {
-            return (String *)a_value;
+    operator const std::string * () const {
+        if (a_type == "std::string") {
+            return (std::string *)a_value;
         }
         return nullptr;
     };
 
     MyAny() = default;
-    MyAny(const MyAny &other) = default;
+    MyAny(const MyAny & other) = default;
+
+    const std::string getType() const { return a_type; }
 
     MyAny(void * value, const char * str): a_value(value), a_type(str) {};
 };

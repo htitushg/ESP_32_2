@@ -3,24 +3,34 @@
 //
 
 #include "LightController.h"
+#include <MyAny.h>
 #include <environment.h>
 #include <utils.h>
 
 LightController::LightController(Broker *broker, const bool value) {
 
-	// DEBUG
-	Serial.printf("Creating LightController with value: %hhd\n", value);
+	if (IS_DEBUG_MODE) {
+		// DEBUG
+		Serial.printf("Creating LightController with value: %s\n", toString(value).c_str());
+	}
 
+	this->a_name = LIGHT_CONTROLLER;
 	this->a_ref_values = std::map<std::string, MyAny>();
   	this->a_broker = broker;
 	this->a_value = value;
 }
 
-void LightController::addReference(MyAny value, String module_name) {
+void LightController::addReference(MyAny value, std::string module_name) {
 	this->a_ref_values[std::string(module_name.c_str())] = value;
 }
 
-void LightController::setValue(const char * value) {
+void LightController::setValue(const std::string & value) {
+
+	if (IS_DEBUG_MODE) {
+		// DEBUG
+		Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
+	}
+
 	if (isBool(value)) {
       	const bool position = parseBool(value);
 
@@ -36,15 +46,17 @@ void LightController::setValue(const char * value) {
 
 		this->Notify();
 
-  		this->a_broker->pub(this->a_name, String(position ? "True" : "False"));
+  		this->a_broker->pub(this->getName(), toString(position));
       	return;
 	}
 
-    // DEBUG
-    Serial.printf("invalid value: %s\n", value);
+	if (IS_DEBUG_MODE) {
+	    // DEBUG
+	    Serial.printf("invalid value: %s\n", value.c_str());
+	}
 }
 
-const String LightController::getValue() const {
+const std::string LightController::getValue() const {
   return toString(this->a_value);
 }
 
@@ -74,13 +86,15 @@ const bool LightController::getLightState() const {
 	return * value;
 }
 
-void LightController::Update(const String &module_name, const String &value) {
+void LightController::Update(const std::string &module_name, const std::string &value) {
 	if (strCaseSensitiveCompare(module_name, PRESENCE_DETECTOR)) {
 		if (!isBool(value)) return;
 		const bool is_presence = parseBool(value);
 
 		// Turn light on when detecting presence, the light is off, and the luminosity is lower than 100
-		if (is_presence && !this->getLightState() && this->getLuminosity() < 100.0f) this->setValue(toString(true).c_str());
+		if (is_presence && !this->getLightState() && this->getLuminosity() < 100.0f) {
+			this->setValue(toString(true));
+		}
 	}
 }
 

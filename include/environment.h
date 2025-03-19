@@ -70,6 +70,10 @@ static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
 // SUBSCRIBE topics
 #define SETUP_TOPIC "setup"
 #define RESET_TOPIC "reset"
+#define DEBUG_TOPIC "debug"
+
+// DEBUG MODE
+bool IS_DEBUG_MODE = true;
 
 // #################################
 // #   Modules (Name / Variable)   #

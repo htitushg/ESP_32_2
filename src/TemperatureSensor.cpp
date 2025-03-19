@@ -3,19 +3,30 @@
 //
 
 #include "TemperatureSensor.h"
+#include <MyAny.h>
 #include <environment.h>
 #include <utils.h>
 
 TemperatureSensor::TemperatureSensor(Broker *broker, const float value) {
 
-    // DEBUG
-    Serial.printf("Creating TemperatureSensor with value: %f\n", value);
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("Creating TemperatureSensor with value: %f\n", value);
+	}
 
+
+    this->a_name = TEMPERATURE_SENSOR;
     this->a_broker = broker;
     this->a_value = value;
 }
 
-void TemperatureSensor::setValue(const char * value) {
+void TemperatureSensor::setValue(const std::string &value) {
+
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("Setting %s value %s...", this->getName().c_str(), value.c_str());
+	}
+
     const float position = parseFloat(value);
 
     // Ignore repeated values
@@ -25,14 +36,10 @@ void TemperatureSensor::setValue(const char * value) {
 
     // TODO -> implement lightSensor logic when changing position
 
-    this->a_broker->pub(this->a_name, toString(position));
-    return;
-
-    // DEBUG
-    Serial.printf("invalid value: %s\n", value);
+    this->a_broker->pub(this->getName(), toString(position));
 }
 
-const String TemperatureSensor::getValue() const {
+const std::string TemperatureSensor::getValue() const {
     return toString(this->a_value);
 }
 
@@ -40,7 +47,7 @@ const MyAny TemperatureSensor::getValueReference() const {
 	return * new MyAny((void *) & this->a_value, "float");
 }
 
-void TemperatureSensor::Update(const String &module_name, const String &value) {
+void TemperatureSensor::Update(const std::string & module_name, const std::string & value) {
 }
 
 void TemperatureSensor::Attach(IObserver *observer) {

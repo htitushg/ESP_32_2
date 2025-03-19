@@ -8,23 +8,20 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-String getChannelModule(char *topic);
-bool strCaseInsensitiveCompare(const String& str, const char chars[]);
-bool strCaseSensitiveCompare(const String& str, const char chars[]);
-int parseInt(const String& str);
-float parseFloat(const String& str);
-bool parseBool(const String& str);
-String toString(bool b);
-String toString(int i);
-String toString(long l);
-String toString(unsigned long ul);
-String toString(float f);
-String toString(double d);
-bool isBool(const String& str);
+std::string getChannelModule(char *topic);
+bool strCaseInsensitiveCompare(const std::string & str, const char chars[]);
+bool strCaseSensitiveCompare(const std::string & str, const char chars[]);
+int parseInt(const std::string & str);
+float parseFloat(const std::string & str);
+bool parseBool(const std::string & str);
+std::string toString(bool b);
+std::string toString(int i);
+std::string toString(unsigned int ui);
+std::string toString(long l);
+std::string toString(unsigned long ul);
+std::string toString(float f);
+std::string toString(double d);
+bool isBool(const std::string & str);
 const char* wl_status_to_string(const wl_status_t status);
-bool fromBoolPtr(const void * reference);
-float fromFloatPtr(const void * reference);
-String fromStringPtr(const void * reference);
-int fromIntPtr(const void * reference);
 
 #endif //UTILS_H

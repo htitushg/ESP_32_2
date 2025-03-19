@@ -7,7 +7,7 @@
 #include <environment.h>
 
 // TODO -> remove if not necessary in the end
-String millisToDate() {
+std::string millisToDate() {
     const unsigned long now = millis();
     const unsigned long days = now / DAY_MILLIS;
     const unsigned long hours = (now % DAY_MILLIS) / HOUR_MILLIS;
@@ -16,22 +16,24 @@ String millisToDate() {
 
     // 999_999 days 23:59:59 max
     char buffer[20];
-    String daysMsg = "";
+    std::string daysMsg = "";
     if (days > 0 ) {
         if (days == 1) {
-            daysMsg = String(days) + " day ";
+            daysMsg = toString(days) + " day ";
         } else {
-            daysMsg = String(days) + " days ";
+            daysMsg = toString(days) + " days ";
         }
     }
     sprintf(buffer, "%s%02d:%02d:%02d", daysMsg.c_str(), hours, minutes, seconds);
     return {buffer};
 }
 
-String getChannelModule(char * topic) {
+std::string getChannelModule(char * topic) {
 
-    // DEBUG
-    Serial.printf("Splitting topic %s into bits...\n", topic);
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("Splitting topic %s into bits...\n", topic);
+	}
 
     char * elements[6];
     int i = 0;
@@ -40,54 +42,61 @@ String getChannelModule(char * topic) {
     {
         elements[i] = p;
 
-        // DEBUG
-        Serial.printf("%d. Got: %s\n", i, p);
+	    if (IS_DEBUG_MODE) {
+            // DEBUG
+            Serial.printf("%d. Got: %s\n", i, p);
+	    }
 
         p = strtok(nullptr, "/");
         ++i;
     }
     if (elements[5] == nullptr) return "";
 
-    // DEBUG
-    Serial.printf("Returning %s\n", elements[5]);
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("Returning %s\n", elements[5]);
+	}
 
     return elements[5];
 }
 
-bool strCaseInsensitiveCompare(const String& str, const char chars[]) {
+bool strCaseInsensitiveCompare(const std::string & str, const char chars[]) {
 
-    // DEBUG
-    Serial.printf("strCaseInsensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("strCaseInsensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
+	}
 
-    const auto str1 = std::string(str.c_str());
     const auto str2 = std::string(chars);
 
-    if (str1.length() != str2.length()) return false;
+    if (str.length() != str2.length()) return false;
 
-    for (int i = 0; i < str1.length(); i++) {
-        if (toupper(str1[i]) != toupper(str2[i])) return false;
+    for (int i = 0; i < str.length(); i++) {
+        if (toupper(str[i]) != toupper(str2[i])) return false;
     }
 
     return true;
 }
 
-bool strCaseSensitiveCompare(const String& str, const char chars[]) {
+bool strCaseSensitiveCompare(const std::string& str, const char chars[]) {
 
-    // DEBUG
-    Serial.printf("strCaseSensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("strCaseSensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
+	}
 
     return strcmp(str.c_str(), chars) == 0;
 }
 
-int parseInt(const String& str) {
+int parseInt(const std::string & str) {
     return atoi(str.c_str());
 }
 
-float parseFloat(const String& str) {
+float parseFloat(const std::string & str) {
     return atof(str.c_str());
 }
 
-bool parseBool(const String& str) {
+bool parseBool(const std::string & str) {
     if (strCaseInsensitiveCompare(str, "True")) return true;
     if (strCaseInsensitiveCompare(str, "1")) return true;
     if (strCaseInsensitiveCompare(str, "False")) return false;
@@ -95,25 +104,28 @@ bool parseBool(const String& str) {
     throw std::invalid_argument( "received non-boolean value to parse" );
 }
 
-String toString(const bool b) {
+std::string toString(const bool b) {
     return b ? "True" : "False";
 }
-String toString(const int i) {
-    return String(i);
+std::string toString(const int i) {
+    return std::to_string(i);
 }
-String toString(const long l) {
-    return String(l);
+std::string toString(const unsigned int ui) {
+    return std::to_string(ui);
 }
-String toString(const unsigned long ul) {
-    return String(ul);
+std::string toString(const long l) {
+    return std::to_string(l);
 }
-String toString(const float f) {
-    return String(f);
+std::string toString(const unsigned long ul) {
+    return std::to_string(ul);
 }
-String toString(const double d) {
-    return String(d);
+std::string toString(const float f) {
+    return std::to_string(f);
 }
-bool isBool(const String& str) {
+std::string toString(const double d) {
+    return std::to_string(d);
+}
+bool isBool(const std::string & str) {
     if (strCaseInsensitiveCompare(str, "True")) return true;
     if (strCaseInsensitiveCompare(str, "False")) return true;
     if (strCaseInsensitiveCompare(str, "0")) return true;
@@ -123,38 +135,14 @@ bool isBool(const String& str) {
 
 const char* wl_status_to_string(const wl_status_t status) {
     switch (status) {
-        case WL_NO_SHIELD: return "WL_NO_SHIELD";
-        case WL_IDLE_STATUS: return "WL_IDLE_STATUS";
-        case WL_NO_SSID_AVAIL: return "WL_NO_SSID_AVAIL";
-        case WL_SCAN_COMPLETED: return "WL_SCAN_COMPLETED";
-        case WL_CONNECTED: return "WL_CONNECTED";
-        case WL_CONNECT_FAILED: return "WL_CONNECT_FAILED";
-        case WL_CONNECTION_LOST: return "WL_CONNECTION_LOST";
-        case WL_DISCONNECTED: return "WL_DISCONNECTED";
+        case WL_NO_SHIELD: return "NO_SHIELD";
+        case WL_IDLE_STATUS: return "IDLE_STATUS";
+        case WL_NO_SSID_AVAIL: return "NO_SSID_AVAIL";
+        case WL_SCAN_COMPLETED: return "SCAN_COMPLETED";
+        case WL_CONNECTED: return "CONNECTED";
+        case WL_CONNECT_FAILED: return "CONNECT_FAILED";
+        case WL_CONNECTION_LOST: return "CONNECTION_LOST";
+        case WL_DISCONNECTED: return "DISCONNECTED";
     }
-    return "Invalid WL_STATUS";
-}
-
-bool fromBoolPtr(const void * reference) {
-    if (reference == nullptr) return false;
-    const auto value = static_cast<const bool*>(reference);
-    return *value;
-}
-
-float fromFloatPtr(const void * reference) {
-    if (reference == nullptr) return 0.0f;
-    const auto value = static_cast<const float*>(reference);
-    return *value;
-}
-
-String fromStringPtr(const void * reference) {
-    if (reference == nullptr) return "";
-    const auto value = static_cast<const char*>(reference);
-    return {value};
-}
-
-int fromIntPtr(const void * reference) {
-    if (reference == nullptr) return 0;
-    const auto value = static_cast<const int*>(reference);
-    return *value;
+    return "Invalid STATUS";
 }

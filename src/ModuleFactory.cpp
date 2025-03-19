@@ -12,10 +12,12 @@
 #include <TemperatureSensor.h>
 #include <ConsumptionSensor.h>
 
-IModule * ModuleFactory::newModule(Broker *broker, const String& type) {
+IModule * ModuleFactory::newModule(Broker *broker, const std::string & type) {
 
-    // DEBUG
-    Serial.printf("Adding module: %s\n", type.c_str());
+	if (IS_DEBUG_MODE) {
+	    // DEBUG
+	    Serial.printf("Adding module: %s\n", type.c_str());
+	}
 
     if (strCaseSensitiveCompare(type, LIGHT_CONTROLLER)) return new LightController(broker, false);
     if (strCaseSensitiveCompare(type, LIGHT_SENSOR)) return new LightSensor(broker, false);
@@ -24,8 +26,10 @@ IModule * ModuleFactory::newModule(Broker *broker, const String& type) {
     if (strCaseSensitiveCompare(type, TEMPERATURE_SENSOR)) return new TemperatureSensor(broker, 0.0f);
     if (strCaseSensitiveCompare(type, CONSUMPTION_SENSOR)) return new ConsumptionSensor(broker, 0.0f);
 
-    // DEBUG
-    Serial.printf("Received unknown module type %s... :/\n", type.c_str());
+	if (IS_DEBUG_MODE) {
+	    // DEBUG
+	    Serial.printf("Received unknown module type %s... :/\n", type.c_str());
+	}
 
     throw std::invalid_argument( "received invalid module type" );
 }

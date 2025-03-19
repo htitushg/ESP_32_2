@@ -2,58 +2,62 @@
 #include <WiFi.h>
 #include <environment.h>
 #include <Application.h>
+#include <utils.h>
 
 std::shared_ptr<Application> app = Application::getInstance();
 
 void sensorLoop(void *) {
-  while (true) {
     app->sensorLoop();
-  }
 }
 
 void setup() {
-  Serial.begin(BAUD_RATE);
-  delay(5000);
+    Serial.begin(BAUD_RATE);
+    delay(5000);
 
-  // DEBUG
-  Serial.println("Serial connection set up.");
+    if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.println("Serial connection set up.");
+        Serial.println("Setting up WiFi...");
+    }
 
-  // DEBUG
-  Serial.println("Setting up WiFi...");
+    WiFiClient wifi = WiFiClient();
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  WiFiClient wifi = WiFiClient();
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("%s - Connecting to Wi-Fi\n", DEVICE_ID);
+        Serial.print("Connecting ");
+    }
 
-  // DEBUG
-  Serial.printf("%s - Connecting to Wi-Fi\n", DEVICE_ID);
-  Serial.print("Connecting ");
-
-  int i = 0;
-  char symbols[] = ".oO";
-  // WiFi.localIP().toString() == "0.0.0.0"
-  while (WiFi.status() != WL_CONNECTED) {
+    int i = 0;
+    char symbols[] = ".oO";
+    while (WiFi.status() != WL_CONNECTED) {
     delay(200);
 
-    if (i % 13 == 0) Serial.printf("\nWifi status: %d\nConnecting ", WiFi.status());
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        if (i % 13 == 0) Serial.printf("\nWifi status: %s\nConnecting ", wl_status_to_string(WiFi.status()));
+        Serial.print(symbols[i%3]);
+	}
 
-    // DEBUG
-    Serial.print(symbols[i%3]);
     ++i;
-  }
+    }
 
-  // DEBUG
-  Serial.println();
+    if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.println();
+    }
 
-  //pinMode(LIGHT, OUTPUT);
+    //pinMode(LIGHT, OUTPUT);
 
-  // Create Application
-  app->initialize(wifi);
-  app->startup();
+    // Create Application
+    app->initialize(wifi);
+    app->startup();
 
-  TaskHandle_t SensorLoopHandle;
+    TaskHandle_t SensorLoopHandle;
 
-  xTaskCreatePinnedToCore(
+    xTaskCreatePinnedToCore(
 
       // Function to implement the task
       sensorLoop,
@@ -78,8 +82,18 @@ void setup() {
 }
 
 void loop() {
-  app->brokerLoop();
+  	app->brokerLoop();
 
-  // TODO -> Remove when adding enough elements here
-  delay(500);
+    // Substract 500ms to a_publish_interval to make sure to print the message while sensorLoop is resetting
+    // a_last_published_time every a_publish_interval
+	if (millis() - app->getLastPublishedTime() > (app->getPublishInterval() - 500)) {
+
+	    if (IS_DEBUG_MODE) {
+            // DEBUG
+            Serial.println("Running broker loop...");
+	    }
+    }
+
+  	// TODO -> Remove when adding enough elements here
+  	delay(500);
 }

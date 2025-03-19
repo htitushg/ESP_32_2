@@ -3,19 +3,30 @@
 //
 
 #include "PresenceDetector.h"
+#include <MyAny.h>
 #include <environment.h>
 #include <utils.h>
 
 PresenceDetector::PresenceDetector(Broker *broker, const bool value) {
 
-    // DEBUG
-    Serial.printf("Creating PresenceDetector with value: %hhd\n", value);
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("Creating PresenceDetector with value: %s\n", toString(value).c_str());
+	}
 
+
+    this->a_name = PRESENCE_DETECTOR;
     this->a_broker = broker;
     this->a_value = value;
 }
 
-void PresenceDetector::setValue(const char * value) {
+void PresenceDetector::setValue(const std::string &value) {
+
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("Setting %s value %s...", this->getName().c_str(), value.c_str());
+	}
+
     if (isBool(value)) {
         const bool position = parseBool(value);
 
@@ -26,15 +37,17 @@ void PresenceDetector::setValue(const char * value) {
 
         // TODO -> implement lightSensor logic when changing position
 
-        this->a_broker->pub(this->a_name, String(position ? "True" : "False"));
+        this->a_broker->pub(this->getName(), toString(position));
         return;
     }
 
-    // DEBUG
-    Serial.printf("invalid value: %s\n", value);
+	if (IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.printf("invalid value: %s\n", value.c_str());
+	}
 }
 
-const String PresenceDetector::getValue() const {
+const std::string PresenceDetector::getValue() const {
     return toString(this->a_value);
 }
 
@@ -42,7 +55,7 @@ const MyAny PresenceDetector::getValueReference() const {
 	return * new MyAny((void *) & this->a_value, "bool");
 }
 
-void PresenceDetector::Update(const String &module_name, const String &value) {
+void PresenceDetector::Update(const std::string & module_name, const std::string & value) {
 }
 
 void PresenceDetector::Attach(IObserver *observer) {

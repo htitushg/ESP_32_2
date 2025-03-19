@@ -19,33 +19,23 @@ class LightController final : public IModule {
     std::vector<IObserver *> a_observers = std::vector<IObserver *>();
 
   public:
-    ~LightController() override {
-      Serial.println("LightController::~LightController()");
-    };
+    ~LightController() override {};
 
     LightController(Broker * broker, bool value);
 
-    void addReference(MyAny value, String module_name) override;
+    void addReference(MyAny value, std::string module_name) override;
 
-    void setValue(const char * value) override;
+    void setValue(const std::string &value) override;
 
-    const String getValue() const override;
+    const std::string getValue() const override;
 
     const MyAny getValueReference() const override;
-
-    // FIXME/TODO -> remove at the end if not used
-    // If other references are needed, might be useful
-    // MyAny Get(const String & att) {
-    //   if (att == "value") {
-    //     return MyAny((void *) & a_value, "bool");
-    //   }
-    // };
 
     const float getLuminosity() const;
 
     const bool getLightState() const;
 
-    void Update(const String & module_name, const String & value) override;
+    void Update(const std::string & module_name, const std::string & value) override;
 
     void Attach(IObserver * observer) override;
 
