@@ -28,18 +28,28 @@ String millisToDate() {
     return {buffer};
 }
 
-String getChannelModule(char *topic) {
+String getChannelModule(char * topic) {
+
+    // DEBUG
+    Serial.printf("Splitting topic %s into bits...\n", topic);
+
     char * elements[6];
-    char * p;
     int i = 0;
-    p = strtok(topic, "/");
+    char * p = strtok(topic, "/");
     while(p != nullptr)
     {
         elements[i] = p;
-        p = strtok(nullptr, ",");
+
+        // DEBUG
+        Serial.printf("%d. Got: %s\n", i, p);
+
+        p = strtok(nullptr, "/");
         ++i;
     }
     if (elements[5] == nullptr) return "";
+
+    // DEBUG
+    Serial.printf("Returning %s\n", elements[5]);
 
     return elements[5];
 }

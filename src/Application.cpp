@@ -57,7 +57,16 @@ void Application::setRootTopic() {
 Application::Application() = default;
 
 void Application::messageHandler(MQTTClient *client, char topic[], char payload[], int length) {
+
+    // DEBUG
+    Serial.printf("Message arrived on topic: %s with length %d\n", topic, length);
+    Serial.printf("payload:\n%s\n", payload);
+    Serial.println("Retrieving application instance...");
+
     std::shared_ptr<Application> app = Application::getInstance();
+
+    // DEBUG
+    Serial.println("Retrieving module name from the topic...");
 
     // Extract the module name from the topic
     const String channel = getChannelModule(topic);
@@ -83,14 +92,14 @@ void Application::messageHandler(MQTTClient *client, char topic[], char payload[
     } else if (strCaseSensitiveCompare(channel, CONSUMPTION_SENSOR)) {
         app->a_modules[consumption_sensor]->setValue(payload);
     } else if (strCaseSensitiveCompare(channel, SETUP_TOPIC)) {
-        app->onSetupMessage(payload);
+        app->onSetupMessage(std::string(payload));
     } else if (strCaseSensitiveCompare(channel, RESET_TOPIC)) {
         const bool position = parseBool(payload);
         if (position) { app->reset(); }
     }
 }
 
-void Application::onSetupMessage(char payload[]) {
+void Application::onSetupMessage(std::string & payload) {
     // DEBUG
     Serial.println("Received setup message");
 
@@ -100,9 +109,8 @@ void Application::onSetupMessage(char payload[]) {
         Serial.println("Setup mode: deserializing message...");
 
         auto doc = JsonDocument();
-        int length;
 
-        DeserializationError error = deserializeJson(doc, payload, length);
+        const DeserializationError error = deserializeJson(doc, payload);
 
         if (error) {
             // DEBUG
@@ -115,8 +123,16 @@ void Application::onSetupMessage(char payload[]) {
         // const char* type = doc["type"]; // "light"
         const char *loc_id = doc["location_id"]; // 1
         this->a_locationID = parseInt(loc_id);
+
+        // DEBUG
+        Serial.printf("Updated location ID: %u\n", this->a_locationID);
+
         const char *loc_type = doc["location_type"]; // "room"
         this->a_location = String(loc_type);
+
+        // DEBUG
+        Serial.printf("Updated location type: %s\n", this->a_location.c_str());
+
         // const char* loc_name = doc["location_name"]; // "John's bedroom"
 
         for (JsonObject module: doc["modules"].as<JsonArray>()) {
@@ -143,9 +159,9 @@ void Application::onSetupMessage(char payload[]) {
     }
 }
 
-void Application::setupModule(const char *name, const char *value) const {
+void Application::setupModule(const char * name, const char * value) const {
     // DEBUG
-    Serial.printf("Setting up module %s...\n", name);
+    Serial.printf("Setting up module %s with value '%s'...\n", name, value);
 
     if (name == nullptr || value == nullptr) return;
 
