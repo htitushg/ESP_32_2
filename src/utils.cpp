@@ -6,6 +6,8 @@
 #include <utils.h>
 #include <environment.h>
 
+extern std::unique_ptr<bool> IS_DEBUG_MODE;
+
 // TODO -> remove if not necessary in the end
 std::string millisToDate() {
     const unsigned long now = millis();
@@ -30,7 +32,7 @@ std::string millisToDate() {
 
 std::string getChannelModule(char * topic) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Splitting topic %s into bits...\n", topic);
 	}
@@ -42,7 +44,7 @@ std::string getChannelModule(char * topic) {
     {
         elements[i] = p;
 
-	    if (IS_DEBUG_MODE) {
+	    if (*IS_DEBUG_MODE) {
             // DEBUG
             Serial.printf("%d. Got: %s\n", i, p);
 	    }
@@ -52,7 +54,7 @@ std::string getChannelModule(char * topic) {
     }
     if (elements[5] == nullptr) return "";
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Returning %s\n", elements[5]);
 	}
@@ -62,7 +64,7 @@ std::string getChannelModule(char * topic) {
 
 bool strCaseInsensitiveCompare(const std::string & str, const char chars[]) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("strCaseInsensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
 	}
@@ -80,7 +82,7 @@ bool strCaseInsensitiveCompare(const std::string & str, const char chars[]) {
 
 bool strCaseSensitiveCompare(const std::string& str, const char chars[]) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("strCaseSensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
 	}
@@ -121,6 +123,11 @@ std::string toString(const unsigned long ul) {
 }
 std::string toString(const float f) {
     return std::to_string(f);
+}
+std::string toString(const float f, const int precision) {
+    char result;
+    sprintf(&result, "%.*f", precision, f);
+    return std::to_string(result);
 }
 std::string toString(const double d) {
     return std::to_string(d);

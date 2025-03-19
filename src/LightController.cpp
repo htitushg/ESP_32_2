@@ -9,7 +9,7 @@
 
 LightController::LightController(Broker *broker, const bool value) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
 		// DEBUG
 		Serial.printf("Creating LightController with value: %s\n", toString(value).c_str());
 	}
@@ -26,7 +26,7 @@ void LightController::addReference(MyAny value, std::string module_name) {
 
 void LightController::setValue(const std::string & value) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
 		// DEBUG
 		Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 	}
@@ -38,6 +38,7 @@ void LightController::setValue(const std::string & value) {
   		if (this->a_value == position) return;
 
   		this->a_value = position;
+
   		if (this->a_value) {
     		digitalWrite(LIGHT, HIGH);
   		} else {
@@ -50,7 +51,7 @@ void LightController::setValue(const std::string & value) {
       	return;
 	}
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
 	    // DEBUG
 	    Serial.printf("invalid value: %s\n", value.c_str());
 	}
@@ -72,6 +73,11 @@ const float LightController::getLuminosity() const {
 	const float * value = (const float *) val;
 	if (value == nullptr) return 0.0f;
 
+	if (*IS_DEBUG_MODE) {
+		// DEBUG
+		Serial.printf("%s: getting luminosity value: %f\n", this->getName().c_str(), *value);
+	}
+
 	return * value;
 }
 
@@ -83,10 +89,21 @@ const bool LightController::getLightState() const {
 	const bool * value = (const bool *) val;
 	if (value == nullptr) return false;
 
+	if (*IS_DEBUG_MODE) {
+		// DEBUG
+		Serial.printf("%s: getting light state: %s\n", this->getName().c_str(), toString(*value).c_str());
+	}
+
 	return * value;
 }
 
 void LightController::Update(const std::string &module_name, const std::string &value) {
+
+	if (*IS_DEBUG_MODE) {
+		// DEBUG
+		Serial.printf("%s: notification received from %s with value %s...\n", this->getName().c_str(), module_name.c_str(), value.c_str());
+	}
+
 	if (strCaseSensitiveCompare(module_name, PRESENCE_DETECTOR)) {
 		if (!isBool(value)) return;
 		const bool is_presence = parseBool(value);

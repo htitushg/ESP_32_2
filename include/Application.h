@@ -43,6 +43,7 @@ class Application {
     void reset();
     void setupModule(nlohmann::json & module) const;
 	static void messageHandler(MQTTClient * client, char topic[], char payload[], int length);
+    void subscribeAllTopics() const;
     void unsubscribeAllTopics() const;
     void setRootTopic();
     Application();
@@ -55,6 +56,11 @@ class Application {
 
     void sensorLoop();
     void brokerLoop() const;
+    const bool brokerStatus() const { return this->a_broker->isConnected(); };
+    void reconnectBroker() const {
+        this->a_broker->connect(Application::messageHandler);
+        this->subscribeAllTopics();
+    }
     void startup();
     void initialize(const WiFiClient& wifi);
 };

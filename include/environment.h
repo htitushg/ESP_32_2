@@ -35,6 +35,7 @@
 
 // PINS FOR ACTUATORS / SENSORS
 #define LIGHT 5
+#include <memory>
 
 // #################################
 // #    Time-related Constants     #
@@ -61,7 +62,10 @@ static char MQTT_USERNAME[] = "";  // CHANGE IT IF REQUIRED
 static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
 
 #define QOS 2
-#define RETAIN true
+#define RETAIN false
+
+// DEBUG MODE
+static  std::unique_ptr<bool> IS_DEBUG_MODE = std::unique_ptr<bool>(new bool(true));
 
 // Standard MQTT topics that this device should publish/subscribe to
 // PUBLISH topics
@@ -71,9 +75,6 @@ static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
 #define SETUP_TOPIC "setup"
 #define RESET_TOPIC "reset"
 #define DEBUG_TOPIC "debug"
-
-// DEBUG MODE
-bool IS_DEBUG_MODE = true;
 
 // #################################
 // #   Modules (Name / Variable)   #

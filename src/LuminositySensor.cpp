@@ -9,7 +9,7 @@
 
 LuminositySensor::LuminositySensor(Broker *broker, const float value) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Creating LuminositySensor with value: %f\n", value);
 	}
@@ -22,15 +22,17 @@ LuminositySensor::LuminositySensor(Broker *broker, const float value) {
 
 void LuminositySensor::setValue(const std::string &value) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
-        Serial.printf("Setting %s value %s...", this->getName().c_str(), value.c_str());
+        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 	}
 
     const float position = parseFloat(value);
 
     // Ignore repeated values
     if (this->a_value == position) return;
+
+    this->a_value = position;
 
     this->Notify();
 
@@ -40,7 +42,7 @@ void LuminositySensor::setValue(const std::string &value) {
 }
 
 const std::string LuminositySensor::getValue() const {
-    return toString(this->a_value);
+    return toString(this->a_value, 2);
 }
 
 const MyAny LuminositySensor::getValueReference() const {

@@ -13,7 +13,7 @@ ConsumptionSensor::~ConsumptionSensor() {
 
 ConsumptionSensor::ConsumptionSensor(Broker *broker, const float value){
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Creating ConsumptionSensor with value: %f\n", value);
 	}
@@ -26,15 +26,17 @@ ConsumptionSensor::ConsumptionSensor(Broker *broker, const float value){
 
 void ConsumptionSensor::setValue(const std::string &value) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
-        Serial.printf("Setting %s value %s...", this->getName().c_str(), value.c_str());
+        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 	}
 
     const float position = parseFloat(value);
 
     // Ignore repeated values
     if (this->a_value == position) return;
+
+    this->a_value = position;
 
     this->Notify();
 
@@ -44,7 +46,7 @@ void ConsumptionSensor::setValue(const std::string &value) {
 }
 
 const std::string ConsumptionSensor::getValue() const {
-    return toString(this->a_value);
+    return toString(this->a_value, 3);
 }
 
 const MyAny ConsumptionSensor::getValueReference() const {

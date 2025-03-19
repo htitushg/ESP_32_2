@@ -20,8 +20,9 @@ std::string toString(unsigned int ui);
 std::string toString(long l);
 std::string toString(unsigned long ul);
 std::string toString(float f);
+std::string toString(float f, int precision);
 std::string toString(double d);
 bool isBool(const std::string & str);
-const char* wl_status_to_string(const wl_status_t status);
+const char* wl_status_to_string(wl_status_t status);
 
 #endif //UTILS_H

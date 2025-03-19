@@ -9,7 +9,7 @@
 
 PresenceDetector::PresenceDetector(Broker *broker, const bool value) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Creating PresenceDetector with value: %s\n", toString(value).c_str());
 	}
@@ -20,18 +20,25 @@ PresenceDetector::PresenceDetector(Broker *broker, const bool value) {
     this->a_value = value;
 }
 
-void PresenceDetector::setValue(const std::string &value) {
+void PresenceDetector::setValue(const std::string & value) {
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
-        Serial.printf("Setting %s value %s...", this->getName().c_str(), value.c_str());
+        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 	}
 
     if (isBool(value)) {
         const bool position = parseBool(value);
 
+        if (*IS_DEBUG_MODE) {
+            // DEBUG
+            Serial.printf("current value: %s/ new value: %s\n", toString(this->a_value).c_str(), toString(position).c_str());
+        }
+
         // Ignore repeated values
         if (this->a_value == position) return;
+
+        this->a_value = position;
 
         this->Notify();
 
@@ -41,7 +48,7 @@ void PresenceDetector::setValue(const std::string &value) {
         return;
     }
 
-	if (IS_DEBUG_MODE) {
+	if (*IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("invalid value: %s\n", value.c_str());
 	}
@@ -73,7 +80,20 @@ void PresenceDetector::Detach(IObserver *observer) {
 }
 
 void PresenceDetector::Notify() {
+
+    if (*IS_DEBUG_MODE) {
+        // DEBUG
+        Serial.println("PresenceDetector notifying observers of an update...");
+    }
+
+    int i = 0;
     for (IObserver* observer : this->a_observers) {
+        if (*IS_DEBUG_MODE) {
+            // DEBUG
+            Serial.printf("PresenceDetector notifying observer #%d of an update...\n", i);
+        }
+        ++i;
+
         observer->Update(PRESENCE_DETECTOR, this->getValue());
     }
 }

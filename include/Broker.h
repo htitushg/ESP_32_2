@@ -17,13 +17,16 @@ class Broker {
     explicit Broker(WiFiClient * network);
 
   public:
-    static std::shared_ptr<Broker> newBroker(WiFiClient * network, void cb(MQTTClient * client, char topic[], char bytes[], int length));
+    static std::shared_ptr<Broker> newBroker(WiFiClient * network, void callback(MQTTClient * client, char topic[], char bytes[], int length));
+    void connect(void callback(MQTTClient * client, char topic[], char bytes[], int length));
     void sub(const std::string & module_name);
     void pub(const std::string & module_name, const std::string & value);
     void pub(const std::string & module_name, const std::string & value, const bool retain);
     void unsub(const std::string & module_name);
     void setRootTopic(const std::string & topic);
-    void loop();
+
+    bool loop();
+    const bool isConnected() const { return this->a_mqtt->connected(); };
 };
 
 #endif //BROKER_H
