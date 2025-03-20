@@ -42,7 +42,6 @@ class Application {
     void onSetupMessage(const std::string & payload);
     void reset();
     void setupModule(nlohmann::json & module) const;
-	static void messageHandler(MQTTClient * client, char topic[], char payload[], int length);
     void subscribeAllTopics() const;
     void unsubscribeAllTopics() const;
     void setRootTopic();
@@ -54,15 +53,16 @@ class Application {
     const unsigned long getLastPublishedTime() const { return a_lastPublishTime; }
     const unsigned int getPublishInterval() const { return a_publish_interval; }
 
+	void messageHandler(char topic[], char payload[], int length);
     void sensorLoop();
     void brokerLoop() const;
     const bool brokerStatus() const { return this->a_broker->isConnected(); };
-    void reconnectBroker() const {
-        this->a_broker->connect(Application::messageHandler);
+    void reconnectBroker(void callback(MQTTClient *client, char topic[], char bytes[], int length)) const {
+        this->a_broker->connect(callback);
         this->subscribeAllTopics();
     }
     void startup();
-    void initialize(const WiFiClient& wifi);
+    void initialize(const WiFiClient& wifi, void callback(MQTTClient *client, char topic[], char bytes[], int length));
 };
 
 #endif //APPLICATION_H

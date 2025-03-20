@@ -9,7 +9,7 @@
 
 TemperatureSensor::TemperatureSensor(Broker *broker, const float value) {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Creating TemperatureSensor with value: %f\n", value);
 	}
@@ -22,7 +22,7 @@ TemperatureSensor::TemperatureSensor(Broker *broker, const float value) {
 
 void TemperatureSensor::setValue(const std::string &value) {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 	}

@@ -10,25 +10,22 @@
 #include <LightController.h>
 #include <ModuleFactory.h>
 
-extern std::unique_ptr<bool> IS_DEBUG_MODE;
-
 std::shared_ptr<Application> Application::app = Application::getInstance();
-std::shared_ptr<Application> app = Application::getInstance();
 
 std::shared_ptr<Application> Application::getInstance() {
     if (app == nullptr) app.reset(new Application());
     return app;
 }
 
-void Application::initialize(const WiFiClient & wifi) {
+void Application::initialize(const WiFiClient & wifi, void callback(MQTTClient *client, char topic[], char bytes[], int length)) {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Initializing application...");
 	}
 
     this->a_network = wifi;
-    this->a_broker = Broker::newBroker(& this->a_network, Application::messageHandler);
+    this->a_broker = Broker::newBroker(& this->a_network, callback);
     this->setRootTopic();
 
     this->a_modules[light_controller].reset(ModuleFactory::newModule(this->a_broker.get(), LIGHT_CONTROLLER));
@@ -52,7 +49,7 @@ void Application::initialize(const WiFiClient & wifi) {
 
 void Application::setRootTopic() {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Defining root topic...");
 	}
@@ -65,7 +62,7 @@ void Application::setRootTopic() {
     // Define the broker's root_topic
     this->a_broker->setRootTopic(this->a_root_topic);
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Root topic set at: %s\n", this->a_root_topic.c_str());
 	}
@@ -73,18 +70,15 @@ void Application::setRootTopic() {
 
 Application::Application() = default;
 
-void Application::messageHandler(MQTTClient *client, char topic[], char payload[], int length) {
+void Application::messageHandler(char topic[], char payload[], int length) {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Message arrived on topic: %s with length %d\n", topic, length);
         Serial.printf("payload:\n%s\n", payload);
-        Serial.println("Retrieving application instance...");
 	}
 
-    std::shared_ptr<Application> app = Application::getInstance();
-
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Retrieving module name from the topic...");
 	}
@@ -92,7 +86,7 @@ void Application::messageHandler(MQTTClient *client, char topic[], char payload[
     // Extract the module name from the topic
     const std::string channel = getChannelModule(topic);
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("|<<<-=================================");
         Serial.printf("| %s - received from MQTT:\n", DEVICE_ID);
@@ -103,48 +97,37 @@ void Application::messageHandler(MQTTClient *client, char topic[], char payload[
 	}
 
     if (strCaseSensitiveCompare(channel, LIGHT_CONTROLLER)) {
-        app->a_modules[light_controller]->setValue(toString(payload));
+        this->a_modules[light_controller]->setValue(std::string(payload));
 
     } else if (strCaseSensitiveCompare(channel, LIGHT_SENSOR)) {
-        bool value = parseBool(payload);
-        app->a_modules[light_sensor]->setValue(toString(payload));
+        this->a_modules[light_sensor]->setValue(std::string(payload));
 
     } else if (strCaseSensitiveCompare(channel, LUMINOSITY_SENSOR)) {
-        float value = parseFloat(payload);
-        app->a_modules[luminosity_sensor]->setValue(toString(payload));
+        this->a_modules[luminosity_sensor]->setValue(std::string(payload));
 
     } else if (strCaseSensitiveCompare(channel, PRESENCE_DETECTOR)) {
-        bool value = parseBool(payload);
-        app->a_modules[presence_detector]->setValue(toString(payload));
+        this->a_modules[presence_detector]->setValue(std::string(payload));
 
     } else if (strCaseSensitiveCompare(channel, TEMPERATURE_SENSOR)) {
-        float value = parseFloat(payload);
-        app->a_modules[temperature_sensor]->setValue(toString(payload));
+        this->a_modules[temperature_sensor]->setValue(std::string(payload));
 
     } else if (strCaseSensitiveCompare(channel, CONSUMPTION_SENSOR)) {
-        float value = parseFloat(payload);
-        app->a_modules[consumption_sensor]->setValue(toString(payload));
+        this->a_modules[consumption_sensor]->setValue(std::string(payload));
 
     } else if (strCaseSensitiveCompare(channel, SETUP_TOPIC)) {
-        app->onSetupMessage(std::string(payload));
+        this->onSetupMessage(std::string(payload));
 
     } else if (strCaseSensitiveCompare(channel, RESET_TOPIC)) {
         const bool position = parseBool(payload);
-        if (position) { app->reset(); }
-
-    } else if (strCaseSensitiveCompare(channel, DEBUG_TOPIC)) {
-        const bool value = parseBool(payload);
-
-        // DEBUG
-        Serial.printf("*IS_DEBUG_MODE = %s | New value = %s\n", toString(*IS_DEBUG_MODE).c_str(), toString(value).c_str());
-
-        *IS_DEBUG_MODE = value;
+        if (position) {
+            this->reset();
+        }
     }
 }
 
 void Application::onSetupMessage(const std::string & payload) {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Received setup message");
 	}
@@ -152,7 +135,7 @@ void Application::onSetupMessage(const std::string & payload) {
     // Parse setup message
     if (this->isWaitingForSetup()) {
 
-	    if (*IS_DEBUG_MODE) {
+	    if (IS_DEBUG_MODE) {
             // DEBUG
             Serial.printf("Payload received:\n%s\n\n", payload.c_str());
             Serial.println("Setup mode: deserializing message...");
@@ -164,14 +147,14 @@ void Application::onSetupMessage(const std::string & payload) {
         // const char* type = doc["type"]; // "light"
         this->a_locationID = doc["location_id"].get<int>(); // 1
 
-	    if (*IS_DEBUG_MODE) {
+	    if (IS_DEBUG_MODE) {
             // DEBUG
             Serial.printf("Updated location ID: %u\n", this->a_locationID);
 	    }
 
         this->a_location = doc["location_type"].get<std::string>(); // "room"
 
-	    if (*IS_DEBUG_MODE) {
+	    if (IS_DEBUG_MODE) {
             // DEBUG
             Serial.printf("Updated location type: %s\n", this->a_location.c_str());
             Serial.printf("New location name: %s\n", doc["location_name"].get<std::string>().c_str());
@@ -183,7 +166,7 @@ void Application::onSetupMessage(const std::string & payload) {
             if (doc["modules"].is_array()) {
                 for (auto & module: doc["modules"]) {
 
-	                if (*IS_DEBUG_MODE) {
+	                if (IS_DEBUG_MODE) {
                         // DEBUG
                         Serial.printf("Loop: module %s\n", module["name"].get<std::string>().c_str());
 	                }
@@ -193,7 +176,7 @@ void Application::onSetupMessage(const std::string & payload) {
             } else { Serial.println("Error: modules is not an array!"); }
         } else { Serial.println("Error: no modules found!"); }
 
-	    if (*IS_DEBUG_MODE) {
+	    if (IS_DEBUG_MODE) {
             // DEBUG
             Serial.println("Unsubscribing temporary setup topic...");
 	    }
@@ -203,7 +186,7 @@ void Application::onSetupMessage(const std::string & payload) {
         // Set the root topic with new values
         this->setRootTopic();
 
-	    if (*IS_DEBUG_MODE) {
+	    if (IS_DEBUG_MODE) {
             // DEBUG
             Serial.println("Completing setup...");
 	    }
@@ -216,7 +199,7 @@ void Application::setupModule(nlohmann::json & module) const {
 
     const std::string name = module["name"].get<std::string>();
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Setting up module %s...\n", name.c_str());
         Serial.printf("Value exists: %s\n", toString(!module["value"].empty()).c_str());
@@ -254,7 +237,7 @@ void Application::setupModule(nlohmann::json & module) const {
 
 void Application::startup() {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Starting up...");
         Serial.println("Preparing startup message...");
@@ -298,7 +281,7 @@ void Application::startup() {
         }
     };
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Serializing startup message...");
         Serial.printf("JSON payload:\n%s\n", message.dump().c_str());
@@ -310,14 +293,14 @@ void Application::startup() {
 
     bool retain = false;
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("Publishing to startup topic with retain to %s...\n", toString(retain).c_str());
 	}
 
     this->a_broker->pub(STARTUP_TOPIC, message.dump(), retain);
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Waiting for setup message...");
 	}
@@ -333,14 +316,13 @@ void Application::startup() {
 
 void Application::subscribeAllTopics() const {
 
-    if (*IS_DEBUG_MODE) {
+    if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Subscribing to topics...");
     }
 
     // Subscribe to MQTT topics
     this->a_broker->sub(RESET_TOPIC);
-    this->a_broker->sub(DEBUG_TOPIC);
     this->a_broker->sub(LIGHT_CONTROLLER);
     this->a_broker->sub(LIGHT_SENSOR);
     this->a_broker->sub(LUMINOSITY_SENSOR);
@@ -353,13 +335,12 @@ void Application::unsubscribeAllTopics() const {
     // TODO -> maybe return to setup here? Is it necessary?...
     // if (this->a_broker == nullptr) return;
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Unsubscribing all topics...");
 	}
 
     this->a_broker->unsub(RESET_TOPIC);
-    this->a_broker->unsub(DEBUG_TOPIC);
     this->a_broker->unsub(LIGHT_CONTROLLER);
     this->a_broker->unsub(LIGHT_SENSOR);
     this->a_broker->unsub(LUMINOSITY_SENSOR);
@@ -370,7 +351,7 @@ void Application::unsubscribeAllTopics() const {
 
 void Application::reset() {
 
-	if (*IS_DEBUG_MODE) {
+	if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Resetting...");
 	}
@@ -390,7 +371,7 @@ void Application::brokerLoop() const {
     while (true) {
         if (!this->isWaitingForSetup() && millis() - this->a_lastPublishTime > this->a_publish_interval) {
 
-	        if (*IS_DEBUG_MODE) {
+	        if (IS_DEBUG_MODE) {
                 // DEBUG
                 Serial.println("Running sensor loop...");
 	        }

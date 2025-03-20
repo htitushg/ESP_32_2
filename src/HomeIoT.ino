@@ -4,13 +4,12 @@
 #include <Application.h>
 #include <utils.h>
 
-extern std::shared_ptr<Application> app;
-extern std::unique_ptr<bool> IS_DEBUG_MODE;
+auto app = Application::getInstance();
 
 void connectToWiFi() {
   	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    if (*IS_DEBUG_MODE) {
+    if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.printf("%s - Connecting to Wi-Fi\n", DEVICE_ID);
         Serial.print("Connecting ");
@@ -23,7 +22,7 @@ void connectToWiFi() {
 
     	delay(200);
 
-		if (*IS_DEBUG_MODE) {
+		if (IS_DEBUG_MODE) {
         	// DEBUG
         	if (i % 14 == 0) Serial.printf("\nWifi status: %s\nConnecting ", wl_status_to_string(WiFi.status()));
         	Serial.print(symbols[i%7]);
@@ -32,7 +31,7 @@ void connectToWiFi() {
     	++i;
     }
 
-    if (*IS_DEBUG_MODE) {
+    if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println();
     }
@@ -42,13 +41,19 @@ void sensorLoop(void *) {
     app->sensorLoop();
 }
 
+void messageHandler(MQTTClient * client, char topic[], char payload[], int length) {
+  app->messageHandler(topic, payload, length);
+}
+
 void setup() {
     Serial.begin(BAUD_RATE);
+
+    Serial.printf("Setting up %s...\n", DEVICE_ID);
 
     // TODO -> remove when code is finished and functional
     delay(1000);
 
-    if (*IS_DEBUG_MODE) {
+    if (IS_DEBUG_MODE) {
         // DEBUG
         Serial.println("Serial connection set up.");
         Serial.println("Setting up WiFi...");
@@ -62,7 +67,7 @@ void setup() {
     //pinMode(LIGHT, OUTPUT);
 
     // Create Application
-    app->initialize(wifi);
+    app->initialize(wifi, messageHandler);
     app->startup();
 
 //    TaskHandle_t SensorLoopHandle;
@@ -96,7 +101,7 @@ void loop() {
 
     if (WiFi.status() != WL_CONNECTED) {
 
-      	if (*IS_DEBUG_MODE) {
+      	if (IS_DEBUG_MODE) {
           	// DEBUG
           	Serial.printf("WiFi status: %s\n", wl_status_to_string(WiFi.status()));
       	}
@@ -104,19 +109,19 @@ void loop() {
 		connectToWiFi();
     }
     if (!app->brokerStatus()) {
-		if (*IS_DEBUG_MODE) {
+		if (IS_DEBUG_MODE) {
           	// DEBUG
           	Serial.printf("MQTT Broker status: %s\n", toString(app->brokerStatus()).c_str());
       	}
 
-		app->reconnectBroker();
+		app->reconnectBroker(messageHandler);
     };
 
     // Substract 500ms to a_publish_interval to make sure to print the message while sensorLoop is resetting
     // a_last_published_time every a_publish_interval
 	if (millis() - app->getLastPublishedTime() > (app->getPublishInterval() - 500)) {
 
-	    if (*IS_DEBUG_MODE) {
+	    if (IS_DEBUG_MODE) {
             // DEBUG
             Serial.println("Running broker loop...");
 	    }

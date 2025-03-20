@@ -31,7 +31,7 @@
 #define DEVICE_TYPE "light"
 #define DEFAULT_LOCATION "room"
 #define DEFAULT_LOCATION_ID 1
-#define BAUD_RATE 9600
+#define BAUD_RATE 1000000
 
 // PINS FOR ACTUATORS / SENSORS
 #define LIGHT 5
@@ -65,7 +65,7 @@ static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
 #define RETAIN false
 
 // DEBUG MODE
-static  std::unique_ptr<bool> IS_DEBUG_MODE = std::unique_ptr<bool>(new bool(true));
+#define IS_DEBUG_MODE true
 
 // Standard MQTT topics that this device should publish/subscribe to
 // PUBLISH topics
@@ -74,7 +74,6 @@ static  std::unique_ptr<bool> IS_DEBUG_MODE = std::unique_ptr<bool>(new bool(tru
 // SUBSCRIBE topics
 #define SETUP_TOPIC "setup"
 #define RESET_TOPIC "reset"
-#define DEBUG_TOPIC "debug"
 
 // #################################
 // #   Modules (Name / Variable)   #
