@@ -1,5 +1,139 @@
 # HomeIoT
 
+<!-- TOC -->
+* [MQTT](#mqtt)
+* [Startup/Setup message](#startupsetup-message)
+* [Class diagram](#class-diagram)
+* [Setup sequence diagram](#setup-sequence-diagram)
+<!-- TOC -->
+
+---
+
+## MQTT
+
+```mermaid
+---
+title: MQTT topics/channels
+---
+
+flowchart LR
+    system["`_SYSTEM NAME_`"]
+    location_type["`_LOCATION TYPE_`"]
+    location_id["`_LOCATION ID_`"]
+    device_type["`_DEVICE TYPE_`"]
+    device_id["`_DEVICE ID_`"]
+    module["`_MODULE_`"]
+    
+    home["`**home**`"]
+    
+    kitchen["`**kitchen**`"]
+    garden["`**garden**`"]
+    room["`**room**`"]
+    
+    kitchen_id["`**1**`"]
+    room1_id["`**2**`"]
+    room2_id["`**3**`"]
+    garden_id["`**4**`"]
+    
+    light["`**light**`"]
+    water_plant["`**waterPlant**`"]
+    
+    device1["`**ESP32-af6f-43b1-a20e**`"]
+    device2["`**ESP32-db87-47b7-998d**`"]
+    device3["`**ESP32-808e-4c62-9c4f**`"]
+    device4["`**ESP32-0158-4d61-85c2**`"]
+    
+    light_controller["`**lightController**`"]
+    luminosity_sensor["`**luminositySensor**`"]
+    water_valve["`**waterValve**`"]
+    humidity_sensor["`**humiditySensor**`"]
+    
+    subgraph OUR SYSTEM NAME
+        system
+        home
+    end
+    subgraph LOCATION
+        subgraph  
+        location_type
+        kitchen
+        garden
+        room
+        end
+        subgraph  
+        location_id
+        kitchen_id
+        garden_id
+        room1_id
+        room2_id
+        end
+    end
+    subgraph DEVICE 
+       subgraph  
+        device_type
+        light
+        water_plant
+        end
+        subgraph  
+        device_id
+        device1
+        device2
+        device3
+        device4
+        end 
+    end
+    subgraph SPECIFIC CHANNEL
+        module
+        light_controller
+        luminosity_sensor
+        water_valve
+        humidity_sensor
+    end
+
+    system  --- location_type   --- location_id     --- device_type     --- device_id   --- module
+    home    --- kitchen     --- kitchen_id  --- light           --- device1     --- light_controller & luminosity_sensor
+    home    --- garden      --- garden_id   --- water_plant     --- device2     --- water_valve & humidity_sensor
+    home    --- room        --- room1_id    --- light           --- device3     --- light_controller & luminosity_sensor
+    home    --- room        --- room2_id    --- light           --- device4     --- light_controller & luminosity_sensor
+```
+
+## Startup/Setup message
+```json
+{
+  "id": "ESP32-af6f-43b1-a20e",
+  "type": "light",
+  "location_id": 3,
+  "location_type": "room",
+  "location_name": "room 3",
+  "modules": [
+    {
+      "name": "lightController",
+      "value": "False"
+    },
+    {
+      "name": "lightSensor",
+      "value": "True"
+    },
+    {
+      "name": "luminositySensor",
+      "value": "150.0"
+    },
+    {
+      "name": "presenceDetector",
+      "value": "True"
+    },
+    {
+      "name": "temperatureSensor",
+      "value": "22.5"
+    },
+    {
+      "name": "consumptionSensor",
+      "value": "32.45"
+    }
+  ]
+}
+```
+
+## Class diagram
 ```mermaid
 ---
 title: Device class diagram
@@ -185,6 +319,8 @@ classDiagram
     IModule ..|> IObserver
     IModule ..|> IObservable
 ```
+
+## Setup sequence diagram
 
 ```mermaid
 sequenceDiagram
