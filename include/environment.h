@@ -55,7 +55,7 @@ static unsigned long DAY_MILLIS = 24 * HOUR_MILLIS;
 // #     Network / MQTT Broker     #
 // #################################
 static char WIFI_SSID[] = "@Hermes";
-static char WIFI_PASSWORD[] = "2kW%s@Vwqqy3ROkeU9&U%Lgi3e6U%u2OnwgNn@Gtrx$n30mhdy";
+static char WIFI_PASSWORD[] = "password";
 static char MQTT_BROKER_ADDRESS[] = "10.3.141.1";
 static int MQTT_PORT = 1883;
 static char MQTT_USERNAME[] = "";  // CHANGE IT IF REQUIRED
