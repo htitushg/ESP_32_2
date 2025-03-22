@@ -9,11 +9,8 @@
 
 LightSensor::LightSensor(Broker *broker, const bool value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Creating LightSensor with value: %s\n", toString(value).c_str());
-	}
-
+    // DEBUG
+    DEBUG_MODE_PRINTF("Creating LightSensor with value: %s\n", toString(value).c_str());
 
     this->a_name = LIGHT_SENSOR;
     this->a_broker = broker;
@@ -22,10 +19,8 @@ LightSensor::LightSensor(Broker *broker, const bool value) {
 
 void LightSensor::setValue(const std::string &value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 
     if (isBool(value)) {
         const bool position = parseBool(value);
@@ -43,10 +38,8 @@ void LightSensor::setValue(const std::string &value) {
         return;
     }
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("invalid value: %s\n", value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("invalid value: %s\n", value.c_str());
 }
 
 const std::string LightSensor::getValue() const {

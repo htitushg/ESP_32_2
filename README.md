@@ -224,21 +224,21 @@ classDiagram
         + Notify() void
         + Update(const String &value) void
     }
-    class LightSensor {
-        # Broker *broker
-        # String name
-        # bool value
-
-        + LightSensor(Broker *broker, bool value) LightSensor
-        + setValue(const char * value) void
-        + getValue() const String
-        + getValueReference() const * void
-        + getName() String
-        + Attach(IObserver *observer) void
-        + Detach(IObserver *observer) void
-        + Notify() void
-        + Update(const String &value) void
-    }
+%%    class LightSensor {
+%%        # Broker *broker
+%%        # String name
+%%        # bool value
+%%
+%%        + LightSensor(Broker *broker, bool value) LightSensor
+%%        + setValue(const char * value) void
+%%        + getValue() const String
+%%        + getValueReference() const * void
+%%        + getName() String
+%%        + Attach(IObserver *observer) void
+%%        + Detach(IObserver *observer) void
+%%        + Notify() void
+%%        + Update(const String &value) void
+%%    }
     class PresenceDetector {
         # Broker *broker
         # String name
@@ -254,67 +254,67 @@ classDiagram
         + Notify() void
         + Update(const String &value) void
     }
-    class LuminositySensor {
-        # Broker *broker
-        # String name
-        # float value
-
-        + LuminositySensor(Broker *broker, float value) LuminositySensor
-        + setValue(const char * value) void
-        + getValue() const String
-        + getValueReference() const * void
-        + getName() String
-        + Attach(IObserver *observer) void
-        + Detach(IObserver *observer) void
-        + Notify() void
-        + Update(const String &value) void
-    }
-    class TemperatureSensor {
-        # Broker *broker
-        # String name
-        # float value
-
-        + TemperatureSensor(Broker *broker, float value) TemperatureSensor
-        + setValue(const char * value) void
-        + getValue() const String
-        + getValueReference() const * void
-        + getName() String
-        + Attach(IObserver *observer) void
-        + Detach(IObserver *observer) void
-        + Notify() void
-        + Update(const String &value) void
-    }
-    class ConsumptionSensor {
-        # Broker *broker
-        # String name
-        # float value
-
-        + ConsumptionSensor(Broker *broker, float value) ConsumptionSensor
-        + setValue(const char * value) void
-        + getValue() const String
-        + getValueReference() const * void
-        + getName() String
-        + Attach(IObserver *observer) void
-        + Detach(IObserver *observer) void
-        + Notify() void
-        + Update(const String &value) void
-    }
+%%    class LuminositySensor {
+%%        # Broker *broker
+%%        # String name
+%%        # float value
+%%
+%%        + LuminositySensor(Broker *broker, float value) LuminositySensor
+%%        + setValue(const char * value) void
+%%        + getValue() const String
+%%        + getValueReference() const * void
+%%        + getName() String
+%%        + Attach(IObserver *observer) void
+%%        + Detach(IObserver *observer) void
+%%        + Notify() void
+%%        + Update(const String &value) void
+%%    }
+%%    class TemperatureSensor {
+%%        # Broker *broker
+%%        # String name
+%%        # float value
+%%
+%%        + TemperatureSensor(Broker *broker, float value) TemperatureSensor
+%%        + setValue(const char * value) void
+%%        + getValue() const String
+%%        + getValueReference() const * void
+%%        + getName() String
+%%        + Attach(IObserver *observer) void
+%%        + Detach(IObserver *observer) void
+%%        + Notify() void
+%%        + Update(const String &value) void
+%%    }
+%%    class ConsumptionSensor {
+%%        # Broker *broker
+%%        # String name
+%%        # float value
+%%
+%%        + ConsumptionSensor(Broker *broker, float value) ConsumptionSensor
+%%        + setValue(const char * value) void
+%%        + getValue() const String
+%%        + getValueReference() const * void
+%%        + getName() String
+%%        + Attach(IObserver *observer) void
+%%        + Detach(IObserver *observer) void
+%%        + Notify() void
+%%        + Update(const String &value) void
+%%    }
     Application *.. IModule
     ModuleFactory ..> IModule
     Application --> ModuleFactory
     Application *.. Broker
     LightController ..|> IModule
-    LightSensor ..|> IModule
+%%    LightSensor ..|> IModule
     PresenceDetector ..|> IModule
-    LuminositySensor ..|> IModule
-    TemperatureSensor ..|> IModule
-    ConsumptionSensor ..|> IModule
-    LightController *.. Broker
-    LightSensor *.. Broker
-    PresenceDetector *.. Broker
-    LuminositySensor *.. Broker
-    TemperatureSensor *.. Broker
-    ConsumptionSensor *.. Broker
+%%    LuminositySensor ..|> IModule
+%%    TemperatureSensor ..|> IModule
+%%    ConsumptionSensor ..|> IModule
+%%    LightController *.. Broker
+%%    LightSensor *.. Broker
+%%    PresenceDetector *.. Broker
+%%    LuminositySensor *.. Broker
+%%    TemperatureSensor *.. Broker
+%%    ConsumptionSensor *.. Broker
     IObservable *.. IObserver
     IModule ..|> IObserver
     IModule ..|> IObservable

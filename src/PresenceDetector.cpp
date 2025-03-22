@@ -9,11 +9,8 @@
 
 PresenceDetector::PresenceDetector(Broker *broker, const bool value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Creating PresenceDetector with value: %s\n", toString(value).c_str());
-	}
-
+    // DEBUG
+    DEBUG_MODE_PRINTF("Creating PresenceDetector with value: %s\n", toString(value).c_str());
 
     this->a_name = PRESENCE_DETECTOR;
     this->a_broker = broker;
@@ -22,18 +19,14 @@ PresenceDetector::PresenceDetector(Broker *broker, const bool value) {
 
 void PresenceDetector::setValue(const std::string & value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 
     if (isBool(value)) {
         const bool position = parseBool(value);
 
-        if (IS_DEBUG_MODE) {
-            // DEBUG
-            Serial.printf("current value: %s/ new value: %s\n", toString(this->a_value).c_str(), toString(position).c_str());
-        }
+        // DEBUG
+        DEBUG_MODE_PRINTF("current value: %s/ new value: %s\n", toString(this->a_value).c_str(), toString(position).c_str());
 
         // Ignore repeated values
         if (this->a_value == position) return;
@@ -48,10 +41,8 @@ void PresenceDetector::setValue(const std::string & value) {
         return;
     }
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("invalid value: %s\n", value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("invalid value: %s\n", value.c_str());
 }
 
 const std::string PresenceDetector::getValue() const {
@@ -81,19 +72,23 @@ void PresenceDetector::Detach(IObserver *observer) {
 
 void PresenceDetector::Notify() {
 
-    if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.println("PresenceDetector notifying observers of an update...");
-    }
+    // DEBUG
+    DEBUG_MODE_PRINTLN("PresenceDetector notifying observers of an update...");
 
     int i = 0;
     for (IObserver* observer : this->a_observers) {
-        if (IS_DEBUG_MODE) {
-            // DEBUG
-            Serial.printf("PresenceDetector notifying observer #%d of an update...\n", i);
-        }
+
+        // DEBUG
+        DEBUG_MODE_PRINTF("PresenceDetector notifying observer #%d of an update...\n", i);
+
         ++i;
 
         observer->Update(PRESENCE_DETECTOR, this->getValue());
     }
 }
+
+void PresenceDetector::readInput() {
+    const bool is_presence = digitalRead(PRESENCE_DETECTOR_PIN);
+    this->setValue(toString(is_presence));
+}
+

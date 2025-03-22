@@ -6,14 +6,17 @@
 #define TEMPERATURESENSOR_H
 
 #include <Arduino.h>
+#include <environment.h>
 #include <IModule.h>
 #include <IObservable.h>
 #include <vector>
+#include <xht11.h>
 
 class TemperatureSensor final: public IModule {
 protected:
     float a_value;
     std::vector<IObserver*> a_observers = std::vector<IObserver*>();
+    xht11 a_sensor = xht11(TEMPERATURE_SENSOR_PIN);
 
 public:
     ~TemperatureSensor() override {};
@@ -32,6 +35,8 @@ public:
     void Detach(IObserver * observer) override;
 
     void Notify() override;
+
+    void readInput() override;
 };
 
 

@@ -9,11 +9,8 @@
 
 LuminositySensor::LuminositySensor(Broker *broker, const float value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Creating LuminositySensor with value: %f\n", value);
-	}
-
+    // DEBUG
+    DEBUG_MODE_PRINTF("Creating LuminositySensor with value: %f\n", value);
 
     this->a_name = LUMINOSITY_SENSOR;
     this->a_broker = broker;
@@ -22,10 +19,8 @@ LuminositySensor::LuminositySensor(Broker *broker, const float value) {
 
 void LuminositySensor::setValue(const std::string &value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 
     const float position = parseFloat(value);
 

@@ -42,6 +42,8 @@ class LightController final : public IModule {
     void Detach(IObserver * observer) override;
 
     void Notify() override;
+
+    void readInput() override {};
 };
 
 #endif //LIGHTCONTROLLER_H

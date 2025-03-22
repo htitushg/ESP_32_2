@@ -34,8 +34,17 @@
 #define BAUD_RATE 1000000
 
 // PINS FOR ACTUATORS / SENSORS
-#define LIGHT 5
-#include <memory>
+// Light
+#define LIGHT 22
+#define LIGHT_VOLTAGE 23
+
+// Presence detector
+#define PRESENCE_DETECTOR_PIN 18
+#define PRESENCE_DETECTOR_VOLTAGE 19
+
+// Temperature/Humidity sensor
+#define TEMPERATURE_SENSOR_PIN 14
+#define TEMPERATURE_SENSOR_VOLTAGE 12
 
 // #################################
 // #    Time-related Constants     #
@@ -45,17 +54,12 @@ static unsigned long MINUTE_MILLIS = 60 * SECOND_MILLIS;
 static unsigned long HOUR_MILLIS = 60 * MINUTE_MILLIS;
 static unsigned long DAY_MILLIS = 24 * HOUR_MILLIS;
 
-// #define SECOND_MILLIS 1000UL;
-// #define MINUTE_MILLIS 60000UL;
-// #define HOUR_MILLIS 3600000UL;
-// #define DAY_MILLIS 86400000UL;
-
 
 // #################################
 // #     Network / MQTT Broker     #
 // #################################
 static char WIFI_SSID[] = "@Hermes";
-static char WIFI_PASSWORD[] = "2kW%s@Vwqqy3ROkeU9&U%Lgi3e6U%u2OnwgNn@Gtrx$n30mhdy";
+static char WIFI_PASSWORD[] = "password";
 static char MQTT_BROKER_ADDRESS[] = "10.3.141.1";
 static int MQTT_PORT = 1883;
 static char MQTT_USERNAME[] = "";  // CHANGE IT IF REQUIRED
@@ -64,8 +68,22 @@ static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
 #define QOS 2
 #define RETAIN false
 
-// DEBUG MODE
-#define IS_DEBUG_MODE true
+// DEBUG MODE (comment the define DEBUG_MODE 1 to disable debug mode)
+#define DEBUG_MODE 1
+
+#ifdef DEBUG_MODE
+    #define DEBUG_MODE_PRINT(x)     Serial.print (x)
+    #define DEBUG_MODE_PRINTDEC(x)  Serial.print (x, DEC)
+    #define DEBUG_MODE_PRINTHEX(x)  Serial.print (x, HEX)
+    #define DEBUG_MODE_PRINTLN(x)   Serial.println (x)
+    #define DEBUG_MODE_PRINTF(...)    Serial.printf (__VA_ARGS__)
+#else
+    #define DEBUG_MODE_PRINT(x)
+    #define DEBUG_MODE_PRINTDEC(x)
+    #define DEBUG_MODE_PRINTHEX(x)
+    #define DEBUG_MODE_PRINTLN(x)
+    #define DEBUG_MODE_PRINTF(...)
+#endif
 
 // Standard MQTT topics that this device should publish/subscribe to
 // PUBLISH topics

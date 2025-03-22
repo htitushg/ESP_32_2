@@ -30,10 +30,8 @@ std::string millisToDate() {
 
 std::string getChannelModule(char * topic) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Splitting topic %s into bits...\n", topic);
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Splitting topic %s into bits...\n", topic);
 
     char * elements[6];
     int i = 0;
@@ -42,30 +40,24 @@ std::string getChannelModule(char * topic) {
     {
         elements[i] = p;
 
-	    if (IS_DEBUG_MODE) {
-            // DEBUG
-            Serial.printf("%d. Got: %s\n", i, p);
-	    }
+        // DEBUG
+        DEBUG_MODE_PRINTF("%d. Got: %s\n", i, p);
 
         p = strtok(nullptr, "/");
         ++i;
     }
     if (elements[5] == nullptr) return "";
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Returning %s\n", elements[5]);
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Returning %s\n", elements[5]);
 
     return elements[5];
 }
 
 bool strCaseInsensitiveCompare(const std::string & str, const char chars[]) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("strCaseInsensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("strCaseInsensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
 
     const auto str2 = std::string(chars);
 
@@ -73,11 +65,6 @@ bool strCaseInsensitiveCompare(const std::string & str, const char chars[]) {
 
     for (int i = 0; i < str.length(); i++) {
         if (toupper(str[i]) != toupper(str2[i])) return false;
-
-        // if (IS_DEBUG_MODE) {
-        //     // DEBUG
-        //     Serial.printf("\t-> %c = %c\n", toupper(str[i]), toupper(str2[i]));
-        // }
     }
 
     return true;
@@ -85,10 +72,8 @@ bool strCaseInsensitiveCompare(const std::string & str, const char chars[]) {
 
 bool strCaseSensitiveCompare(const std::string& str, const char chars[]) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("strCaseSensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("strCaseSensitiveCompare '%s' and '%s'\n", str.c_str(), chars);
 
     return strcmp(str.c_str(), chars) == 0;
 }

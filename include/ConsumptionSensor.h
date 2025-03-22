@@ -33,6 +33,8 @@ public:
     void Detach(IObserver * observer) override;
 
     void Notify() override;
+
+    void readInput() override {};
 };
 
 

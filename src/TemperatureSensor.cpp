@@ -9,11 +9,8 @@
 
 TemperatureSensor::TemperatureSensor(Broker *broker, const float value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Creating TemperatureSensor with value: %f\n", value);
-	}
-
+    // DEBUG
+    DEBUG_MODE_PRINTF("Creating TemperatureSensor with value: %f\n", value);
 
     this->a_name = TEMPERATURE_SENSOR;
     this->a_broker = broker;
@@ -22,10 +19,8 @@ TemperatureSensor::TemperatureSensor(Broker *broker, const float value) {
 
 void TemperatureSensor::setValue(const std::string &value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 
     const float position = parseFloat(value);
 
@@ -71,3 +66,25 @@ void TemperatureSensor::Notify() {
         observer->Update(TEMPERATURE_SENSOR, this->getValue());
     }
 }
+
+void TemperatureSensor::readInput() {
+    unsigned char dht[4] = {0, 0, 0, 0};
+
+    // Check if sensor works
+    if (this->a_sensor.receive(dht)) {
+        DEBUG_MODE_PRINTF("Humidity: %d.%d%%\n", dht[0], dht[1]);
+
+        float temperature = (float) dht[2];
+        if (dht[3] < 10) {
+            Serial.println("Decimal part < 10");
+            temperature += (float) dht[3] / 10.0f;
+        }
+
+        this->setValue(toString(temperature));
+    }
+    else {
+        // DEBUG -> read sensor error
+        DEBUG_MODE_PRINTLN("Temperature sensor error");
+    }
+}
+

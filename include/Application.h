@@ -52,9 +52,11 @@ class Application {
 
     const unsigned long getLastPublishedTime() const { return a_lastPublishTime; }
     const unsigned int getPublishInterval() const { return a_publish_interval; }
+    void resetTime() { a_lastPublishTime = millis(); }
 
 	void messageHandler(char topic[], char payload[], int length);
     void sensorLoop();
+    void readInputSensor();
     void brokerLoop() const;
     const bool brokerStatus() const { return this->a_broker->isConnected(); };
     void reconnectBroker(void callback(MQTTClient *client, char topic[], char bytes[], int length)) const {

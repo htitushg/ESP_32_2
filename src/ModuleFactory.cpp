@@ -14,10 +14,8 @@
 
 IModule * ModuleFactory::newModule(Broker *broker, const std::string & type) {
 
-	if (IS_DEBUG_MODE) {
-	    // DEBUG
-	    Serial.printf("Adding module: %s\n", type.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Adding module: %s\n", type.c_str());
 
     if (strCaseSensitiveCompare(type, LIGHT_CONTROLLER)) return new LightController(broker, false);
     if (strCaseSensitiveCompare(type, LIGHT_SENSOR)) return new LightSensor(broker, false);
@@ -26,10 +24,8 @@ IModule * ModuleFactory::newModule(Broker *broker, const std::string & type) {
     if (strCaseSensitiveCompare(type, TEMPERATURE_SENSOR)) return new TemperatureSensor(broker, 0.0f);
     if (strCaseSensitiveCompare(type, CONSUMPTION_SENSOR)) return new ConsumptionSensor(broker, 0.0f);
 
-	if (IS_DEBUG_MODE) {
-	    // DEBUG
-	    Serial.printf("Received unknown module type %s... :/\n", type.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Received unknown module type %s... :/\n", type.c_str());
 
     throw std::invalid_argument( "received invalid module type" );
 }

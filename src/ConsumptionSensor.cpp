@@ -11,11 +11,8 @@ ConsumptionSensor::~ConsumptionSensor() {}
 
 ConsumptionSensor::ConsumptionSensor(Broker *broker, const float value){
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Creating ConsumptionSensor with value: %f\n", value);
-	}
-
+    // DEBUG
+    DEBUG_MODE_PRINTF("Creating ConsumptionSensor with value: %f\n", value);
 
     this->a_name = CONSUMPTION_SENSOR;
     this->a_broker = broker;
@@ -24,10 +21,8 @@ ConsumptionSensor::ConsumptionSensor(Broker *broker, const float value){
 
 void ConsumptionSensor::setValue(const std::string &value) {
 
-	if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 
     const float position = parseFloat(value);
 

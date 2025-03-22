@@ -9,10 +9,8 @@
 
 LightController::LightController(Broker *broker, const bool value) {
 
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("Creating LightController with value: %s\n", toString(value).c_str());
-	}
+	// DEBUG
+	DEBUG_MODE_PRINTF("Creating LightController with value: %s\n", toString(value).c_str());
 
 	this->a_name = LIGHT_CONTROLLER;
 	this->a_ref_values = std::map<std::string, MyAny>();
@@ -26,10 +24,8 @@ void LightController::addReference(MyAny value, std::string module_name) {
 
 void LightController::setValue(const std::string & value) {
 
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
-	}
+	// DEBUG
+	DEBUG_MODE_PRINTF("Setting %s value %s...\n", this->getName().c_str(), value.c_str());
 
 	if (isBool(value)) {
       	const bool position = parseBool(value);
@@ -51,10 +47,8 @@ void LightController::setValue(const std::string & value) {
       	return;
 	}
 
-	if (IS_DEBUG_MODE) {
-	    // DEBUG
-	    Serial.printf("invalid value: %s\n", value.c_str());
-	}
+    // DEBUG
+    DEBUG_MODE_PRINTF("invalid value: %s\n", value.c_str());
 }
 
 const std::string LightController::getValue() const {
@@ -70,24 +64,15 @@ const float LightController::getLuminosity() const {
 	// Return nullptr if not found
 	const MyAny val = this->a_ref_values.at(std::string(LUMINOSITY_SENSOR));
 
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("Got luminosity value type: %s\n", val.getType().c_str());
-	}
+	// DEBUG
+	DEBUG_MODE_PRINTF("Got luminosity value type: %s\n", val.getType().c_str());
 
 	const float * value = (const float *) val;
 
 	if (value == nullptr) return 0.0f;
 
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("Got luminosity value: %s\n", toString(*value).c_str());
-	}
-
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("%s: getting luminosity value: %f\n", this->getName().c_str(), *value);
-	}
+	// DEBUG
+	DEBUG_MODE_PRINTF("%s: getting luminosity value: %f\n", this->getName().c_str(), *value);
 
 	return * value;
 }
@@ -97,34 +82,23 @@ const bool LightController::getLightState() const {
 	// Return nullptr if not found
 	const MyAny val = this->a_ref_values.at(std::string(LIGHT_SENSOR));
 
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("Got lightState value type: %s\n", val.getType().c_str());
-	}
+	// DEBUG
+	DEBUG_MODE_PRINTF("Got lightState value type: %s\n", val.getType().c_str());
 
 	const bool * value = (const bool *) val;
 
 	if (value == nullptr) return false;
 
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("Got lightState value: %s\n", toString(*value).c_str());
-	}
-
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("%s: getting light state: %s\n", this->getName().c_str(), toString(*value).c_str());
-	}
+	// DEBUG
+	DEBUG_MODE_PRINTF("%s: getting light state: %s\n", this->getName().c_str(), toString(*value).c_str());
 
 	return * value;
 }
 
 void LightController::Update(const std::string &module_name, const std::string &value) {
 
-	if (IS_DEBUG_MODE) {
-		// DEBUG
-		Serial.printf("%s: notification received from %s with value %s...\n", this->getName().c_str(), module_name.c_str(), value.c_str());
-	}
+	// DEBUG
+	DEBUG_MODE_PRINTF("%s: notification received from %s with value %s...\n", this->getName().c_str(), module_name.c_str(), value.c_str());
 
 	if (strCaseSensitiveCompare(module_name, PRESENCE_DETECTOR)) {
 		if (!isBool(value)) return;

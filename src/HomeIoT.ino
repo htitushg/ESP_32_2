@@ -9,11 +9,9 @@ auto app = Application::getInstance();
 void connectToWiFi() {
   	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.printf("%s - Connecting to Wi-Fi\n", DEVICE_ID);
-        Serial.print("Connecting ");
-    }
+    // DEBUG
+    DEBUG_MODE_PRINTF("%s - Connecting to Wi-Fi\n", DEVICE_ID);
+    DEBUG_MODE_PRINT("Connecting ");
 
     int i = 0;
     char symbols[] = "..ooOO ";
@@ -22,19 +20,15 @@ void connectToWiFi() {
 
     	delay(200);
 
-		if (IS_DEBUG_MODE) {
-        	// DEBUG
-        	if (i % 14 == 0) Serial.printf("\nWifi status: %s\nConnecting ", wl_status_to_string(WiFi.status()));
-        	Serial.print(symbols[i%7]);
-		}
+        // DEBUG
+        if (i % 14 == 0) DEBUG_MODE_PRINTF("\nWifi status: %s\nConnecting ", wl_status_to_string(WiFi.status()));
+        DEBUG_MODE_PRINT(symbols[i%7]);
 
     	++i;
     }
 
-    if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.println();
-    }
+    // DEBUG
+    DEBUG_MODE_PRINTLN();
 }
 
 void sensorLoop(void *) {
@@ -46,25 +40,37 @@ void messageHandler(MQTTClient * client, char topic[], char payload[], int lengt
 }
 
 void setup() {
-    Serial.begin(BAUD_RATE);
+//  	#ifdef DEBUG_MODE
+    	Serial.begin(BAUD_RATE);
+//    #endif
 
-    Serial.printf("Setting up %s...\n", DEVICE_ID);
+    Serial.printf("Initializing %s...\n", DEVICE_ID);
+
+    DEBUG_MODE_PRINTF("Setting up %s...\n", DEVICE_ID);
 
     // TODO -> remove when code is finished and functional
     delay(1000);
 
-    if (IS_DEBUG_MODE) {
-        // DEBUG
-        Serial.println("Serial connection set up.");
-        Serial.println("Setting up WiFi...");
-    }
+    // DEBUG
+    DEBUG_MODE_PRINTLN("Serial connection set up.");
+    DEBUG_MODE_PRINTLN("Setting up WiFi...");
 
     WiFiClient wifi = WiFiClient();
     WiFi.mode(WIFI_STA);
 
     connectToWiFi();
 
-    //pinMode(LIGHT, OUTPUT);
+    pinMode(LIGHT, OUTPUT);
+    pinMode(LIGHT_VOLTAGE, OUTPUT);
+    digitalWrite(LIGHT_VOLTAGE, HIGH);
+
+    pinMode(PRESENCE_DETECTOR_PIN, INPUT);
+    pinMode(PRESENCE_DETECTOR_VOLTAGE, OUTPUT);
+    digitalWrite(PRESENCE_DETECTOR_VOLTAGE, HIGH);
+
+    pinMode(TEMPERATURE_SENSOR_PIN, INPUT);
+    pinMode(TEMPERATURE_SENSOR_VOLTAGE, OUTPUT);
+    digitalWrite(TEMPERATURE_SENSOR_VOLTAGE, HIGH);
 
     // Create Application
     app->initialize(wifi, messageHandler);
@@ -101,18 +107,14 @@ void loop() {
 
     if (WiFi.status() != WL_CONNECTED) {
 
-      	if (IS_DEBUG_MODE) {
-          	// DEBUG
-          	Serial.printf("WiFi status: %s\n", wl_status_to_string(WiFi.status()));
-      	}
+        // DEBUG
+        DEBUG_MODE_PRINTF("WiFi status: %s\n", wl_status_to_string(WiFi.status()));
 
 		connectToWiFi();
     }
     if (!app->brokerStatus()) {
-		if (IS_DEBUG_MODE) {
-          	// DEBUG
-          	Serial.printf("MQTT Broker status: %s\n", toString(app->brokerStatus()).c_str());
-      	}
+        // DEBUG
+        DEBUG_MODE_PRINTF("MQTT Broker status: %s\n", toString(app->brokerStatus()).c_str());
 
 		app->reconnectBroker(messageHandler);
     };
@@ -121,10 +123,12 @@ void loop() {
     // a_last_published_time every a_publish_interval
 	if (millis() - app->getLastPublishedTime() > (app->getPublishInterval() - 500)) {
 
-	    if (IS_DEBUG_MODE) {
-            // DEBUG
-            Serial.println("Running broker loop...");
-	    }
+        // DEBUG
+        DEBUG_MODE_PRINTLN("Running broker loop...");
+
+        app->readInputSensor();
+
+        app->resetTime();
     }
 
   	// TODO -> Remove when adding enough elements here
