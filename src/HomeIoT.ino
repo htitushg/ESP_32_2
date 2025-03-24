@@ -7,28 +7,36 @@
 auto app = Application::getInstance();
 
 void connectToWiFi() {
-  	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    // DEBUG
-    DEBUG_MODE_PRINTF("%s - Connecting to Wi-Fi\n", DEVICE_ID);
-    DEBUG_MODE_PRINT("Connecting ");
-
-    int i = 0;
-    char symbols[] = "..ooOO ";
-
-    while (WiFi.status() != WL_CONNECTED) {
-
-    	delay(200);
+    	WiFi.mode(WIFI_STA);
+        WiFi.disconnect();
+  	    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
         // DEBUG
-        if (i % 14 == 0) DEBUG_MODE_PRINTF("\nWifi status: %s\nConnecting ", wl_status_to_string(WiFi.status()));
-        DEBUG_MODE_PRINT(symbols[i%7]);
+        DEBUG_MODE_PRINTF("%s - Connecting to Wi-Fi\n", DEVICE_ID);
+        DEBUG_MODE_PRINT("Connecting ");
 
-    	++i;
-    }
+        int i = 0;
+        char symbols[] = "..ooOO ";
 
-    // DEBUG
-    DEBUG_MODE_PRINTLN();
+        while (WiFi.status() != WL_CONNECTED) {
+
+    	    delay(200);
+
+            // DEBUG
+            if (i % 14 == 0) DEBUG_MODE_PRINTF("\nWifi status: %s\nConnecting  ", wl_status_to_string(WiFi.status()));
+            DEBUG_MODE_PRINT(symbols[i%7]);
+
+        	// Restart the device if the WiFi connection is not set in 2 min.
+//      	if (now > 120000) ESP.restart();
+
+    	    ++i;
+        }
+
+        // DEBUG
+        DEBUG_MODE_PRINTLN();
+
+        if (WiFi.status() == WL_CONNECTED) DEBUG_MODE_PRINTLN("Wifi connected successfully!");
 }
 
 void sensorLoop(void *) {
@@ -40,11 +48,10 @@ void messageHandler(MQTTClient * client, char topic[], char payload[], int lengt
 }
 
 void setup() {
-//  	#ifdef DEBUG_MODE
-    	Serial.begin(BAUD_RATE);
-//    #endif
 
-    Serial.printf("Initializing %s...\n", DEVICE_ID);
+  	#ifdef DEBUG_MODE
+    	Serial.begin(BAUD_RATE);
+    #endif
 
     DEBUG_MODE_PRINTF("Setting up %s...\n", DEVICE_ID);
 
@@ -56,7 +63,6 @@ void setup() {
     DEBUG_MODE_PRINTLN("Setting up WiFi...");
 
     WiFiClient wifi = WiFiClient();
-    WiFi.mode(WIFI_STA);
 
     connectToWiFi();
 

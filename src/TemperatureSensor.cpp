@@ -68,16 +68,22 @@ void TemperatureSensor::Notify() {
 }
 
 void TemperatureSensor::readInput() {
-    unsigned char dht[4] = {0, 0, 0, 0};
+
+    unsigned char sensor_values[4] = {0, 0, 0, 0};
 
     // Check if sensor works
-    if (this->a_sensor.receive(dht)) {
-        DEBUG_MODE_PRINTF("Humidity: %d.%d%%\n", dht[0], dht[1]);
+    if (this->a_sensor.receive(sensor_values)) {
 
-        float temperature = (float) dht[2];
-        if (dht[3] < 10) {
-            Serial.println("Decimal part < 10");
-            temperature += (float) dht[3] / 10.0f;
+        // DEBUG
+        DEBUG_MODE_PRINTF("Humidity: %d.%d%%\n", sensor_values[0], sensor_values[1]);
+
+        float temperature = (float) sensor_values[2];
+        if (sensor_values[3] < 10) {
+
+            // DEBUG
+            DEBUG_MODE_PRINTLN("Decimal part < 10");
+
+            temperature += (float) sensor_values[3] / 10.0f;
         }
 
         this->setValue(toString(temperature));
