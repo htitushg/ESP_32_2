@@ -372,28 +372,44 @@ sequenceDiagram
         participant TS as Temperature Sensor
         participant LB as Light Bulb
     end
-    box magenta Server
+    box darkslateblue Server
         participant MQTT as MQTT Broker
     end
     box green User
         participant C as Client
     end
     
-    LC --> MQTT : subscribe LightController channel
-    
-    loop updateSensors
-        PD --> MQTT : send updated presence status
-        LS --> MQTT : send updated luminosity
-        TS --> MQTT : send updated temperature
+    Note over LC, MQTT: Setup
+    critical MQTT Subscription
+        LC ->> MQTT : subscribe LightController channel
+    end
+
+    Note over LC, MQTT: Routine loop
+    loop check sensors every second
+        opt If value changed
+            PD ->> MQTT : send updated presence status
+        end
+        opt If value changed
+            LS ->> MQTT : send updated luminosity
+        end
+        opt If value changed
+            TS ->> MQTT : send updated temperature
+        end
+    end
+
+    Note over LC, C: Use case: someone enters the room 
+    C ->> PD : client entered in room
+    par notify MQTT
+        PD ->> MQTT : presence detected
+    and notify Light Controller
+        PD ->> LC : presence detected
     end
     
-    C --> PD : client entered in room
-    PD --> MQTT : presence detected
-    PD --> LC : presence detected
-    
-    LC --> LS : get luminosity
-    opt: Luminosity inferior than 100
-        LC --> LB : turn on light
-        LC --> MQTT : light turned on
+    LC ->> LS : get luminosity
+    alt: Luminosity inferior than 100
+        LC ->> LB : turn on light
+        LC ->> MQTT : light turned on
+    else: Luminosity superior or equal to 100
+        Note right of LC : nothing happens
     end
 ```
