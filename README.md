@@ -361,3 +361,39 @@ sequenceDiagram
     A ->> CS: Update value
     A ->> S: Setup complete
 ```
+
+```mermaid
+sequenceDiagram
+    autonumber
+    box teal Light
+        participant LC as Light Controller
+        participant PD as Presence Detector
+        participant LS as Luminosity Sensor
+        participant TS as Temperature Sensor
+        participant LB as Light Bulb
+    end
+    box magenta Server
+        participant MQTT as MQTT Broker
+    end
+    box green User
+        participant C as Client
+    end
+    
+    LC --> MQTT : subscribe LightController channel
+    
+    loop updateSensors
+        PD --> MQTT : send updated presence status
+        LS --> MQTT : send updated luminosity
+        TS --> MQTT : send updated temperature
+    end
+    
+    C --> PD : client entered in room
+    PD --> MQTT : presence detected
+    PD --> LC : presence detected
+    
+    LC --> LS : get luminosity
+    opt: Luminosity inferior than 100
+        LC --> LB : turn on light
+        LC --> MQTT : light turned on
+    end
+```
