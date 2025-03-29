@@ -6,137 +6,148 @@
 
 auto app = Application::getInstance();
 
-void connectToWiFi() {
+void connectToWiFi()
+{
 
-    	WiFi.mode(WIFI_STA);
-        WiFi.disconnect();
-  	    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFi.mode(WIFI_STA);
+  // WiFi.disconnect();
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-        // DEBUG
-        DEBUG_MODE_PRINTF("%s - Connecting to Wi-Fi\n", DEVICE_ID);
-        DEBUG_MODE_PRINT("Connecting ");
+  // DEBUG
+  DEBUG_MODE_PRINTF("%s - Connecting to Wi-Fi\n", DEVICE_ID);
+  DEBUG_MODE_PRINT("Connecting ");
 
-        int i = 0;
-        char symbols[] = "..ooOO ";
+  int i = 0;
+  char symbols[] = "..ooOO ";
 
-        while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
 
-    	    delay(200);
+    delay(200);
 
-            // DEBUG
-            if (i % 14 == 0) DEBUG_MODE_PRINTF("\nWifi status: %s\nConnecting  ", wl_status_to_string(WiFi.status()));
-            DEBUG_MODE_PRINT(symbols[i%7]);
+    // DEBUG
+    if (i % 14 == 0)
+      DEBUG_MODE_PRINTF("\nWifi status: %s\nConnecting  ", wl_status_to_string(WiFi.status()));
+    DEBUG_MODE_PRINT(symbols[i % 7]);
 
-        	// Restart the device if the WiFi connection is not set in 2 min.
-//      	if (now > 120000) ESP.restart();
+    // Restart the device if the WiFi connection is not set in 2 min.
+    //      	if (now > 120000) ESP.restart();
 
-    	    ++i;
-        }
+    ++i;
+  }
 
-        // DEBUG
-        DEBUG_MODE_PRINTLN();
+  // DEBUG
+  DEBUG_MODE_PRINTLN();
 
-        if (WiFi.status() == WL_CONNECTED) DEBUG_MODE_PRINTLN("Wifi connected successfully!");
+  if (WiFi.status() == WL_CONNECTED)
+    DEBUG_MODE_PRINTLN("Wifi connected successfully!");
 }
 
-void sensorLoop(void *) {
-    app->sensorLoop();
+void sensorLoop(void *)
+{
+  app->sensorLoop();
 }
 
-void messageHandler(MQTTClient * client, char topic[], char payload[], int length) {
+void messageHandler(MQTTClient *client, char topic[], char payload[], int length)
+{
   app->messageHandler(topic, payload, length);
 }
 
-void setup() {
+void setup()
+{
 
-  	#ifdef DEBUG_MODE
-    	Serial.begin(BAUD_RATE);
-    #endif
+#ifdef DEBUG_MODE
+  Serial.begin(BAUD_RATE);
+#endif
 
-    DEBUG_MODE_PRINTF("Setting up %s...\n", DEVICE_ID);
+  DEBUG_MODE_PRINTF("Setting up %s...\n", DEVICE_ID);
 
-    // TODO -> remove when code is finished and functional
-    delay(1000);
+  // TODO -> remove when code is finished and functional
+  delay(1000);
 
-    // DEBUG
-    DEBUG_MODE_PRINTLN("Serial connection set up.");
-    DEBUG_MODE_PRINTLN("Setting up WiFi...");
+  // DEBUG
+  DEBUG_MODE_PRINTLN("Serial connection set up.");
+  DEBUG_MODE_PRINTLN("Setting up WiFi...");
 
-    WiFiClient wifi = WiFiClient();
+  WiFiClient wifi = WiFiClient();
 
-    connectToWiFi();
+  connectToWiFi();
 
-    pinMode(LIGHT, OUTPUT);
-    pinMode(LIGHT_VOLTAGE, OUTPUT);
-    digitalWrite(LIGHT_VOLTAGE, HIGH);
+  pinMode(LIGHT, OUTPUT);
+  pinMode(LIGHT_VOLTAGE, OUTPUT);
+  digitalWrite(LIGHT_VOLTAGE, HIGH);
 
-    pinMode(PRESENCE_DETECTOR_PIN, INPUT);
-    pinMode(PRESENCE_DETECTOR_VOLTAGE, OUTPUT);
-    digitalWrite(PRESENCE_DETECTOR_VOLTAGE, HIGH);
+  pinMode(PRESENCE_DETECTOR_PIN, INPUT);
+  pinMode(PRESENCE_DETECTOR_VOLTAGE, OUTPUT);
+  digitalWrite(PRESENCE_DETECTOR_VOLTAGE, HIGH);
 
-    pinMode(TEMPERATURE_SENSOR_PIN, INPUT);
-    pinMode(TEMPERATURE_SENSOR_VOLTAGE, OUTPUT);
-    digitalWrite(TEMPERATURE_SENSOR_VOLTAGE, HIGH);
+  pinMode(TEMPERATURE_SENSOR_PIN, INPUT);
+  pinMode(TEMPERATURE_SENSOR_VOLTAGE, OUTPUT);
+  digitalWrite(TEMPERATURE_SENSOR_VOLTAGE, HIGH);
 
-    // Create Application
-    app->initialize(wifi, messageHandler);
-    app->startup();
+  // Create Application
+  app->initialize(wifi, messageHandler);
+  app->startup();
 
-//    TaskHandle_t SensorLoopHandle;
-//
-//    xTaskCreatePinnedToCore(
-//
-//      // Function to implement the task
-//      sensorLoop,
-//
-//      // Name of the task
-//      "sensor_loop",
-//
-//      // Stack size in words
-//      10000,
-//
-//      // Task input parameter
-//      NULL,
-//
-//      // Priority of the task
-//      0,
-//
-//      // Task handle.
-//      &SensorLoopHandle,
-//
-//      // Core to use
-//      0);
+  //    TaskHandle_t SensorLoopHandle;
+  //
+  //    xTaskCreatePinnedToCore(
+  //
+  //      // Function to implement the task
+  //      sensorLoop,
+  //
+  //      // Name of the task
+  //      "sensor_loop",
+  //
+  //      // Stack size in words
+  //      10000,
+  //
+  //      // Task input parameter
+  //      NULL,
+  //
+  //      // Priority of the task
+  //      0,
+  //
+  //      // Task handle.
+  //      &SensorLoopHandle,
+  //
+  //      // Core to use
+  //      0);
 }
 
-void loop() {
-  	app->brokerLoop();
+void loop()
+{
+  app->brokerLoop();
 
-    if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
 
-        // DEBUG
-        DEBUG_MODE_PRINTF("WiFi status: %s\n", wl_status_to_string(WiFi.status()));
+    // DEBUG
+    DEBUG_MODE_PRINTF("WiFi status: %s\n", wl_status_to_string(WiFi.status()));
 
-		connectToWiFi();
-    }
-    if (!app->brokerStatus()) {
-        // DEBUG
-        DEBUG_MODE_PRINTF("MQTT Broker status: %s\n", toString(app->brokerStatus()).c_str());
+    connectToWiFi();
+  }
+  if (!app->brokerStatus())
+  {
+    // DEBUG
+    DEBUG_MODE_PRINTF("MQTT Broker status: %s\n", toString(app->brokerStatus()).c_str());
 
-		app->reconnectBroker(messageHandler);
-    };
+    app->reconnectBroker(messageHandler);
+  };
 
-    // Substract 500ms to a_publish_interval to make sure to print the message while sensorLoop is resetting
-    // a_last_published_time every a_publish_interval
-	if (millis() - app->getLastPublishedTime() > (app->getPublishInterval() - 500)) {
+  // Substract 500ms to a_publish_interval to make sure to print the message while sensorLoop is resetting
+  // a_last_published_time every a_publish_interval
+  if (millis() - app->getLastPublishedTime() > (app->getPublishInterval() - 500))
+  {
 
-        // DEBUG
-        DEBUG_MODE_PRINTLN("Running broker loop...");
+    // DEBUG
+    DEBUG_MODE_PRINTLN("Running broker loop...");
 
-        app->readInputSensor();
+    app->readInputSensor();
 
-        app->resetTime();
-    }
+    app->resetTime();
+  }
 
-  	// TODO -> Remove when adding enough elements here
-  	delay(500);
+  // TODO -> Remove when adding enough elements here
+  delay(500);
 }

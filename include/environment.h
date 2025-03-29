@@ -11,8 +11,8 @@
  * UUIDs for Boards:
  *
  * 00a4-43bb-8b77 -> ESP32 Light device 2
- * af6f-43b1-a20e -> ESP32 Light device 1 (HERE)
- * db87-47b7-998d
+ * af6f-43b1-a20e -> ESP32 Light device 1 (HERE) esp32-65FF38
+ * db87-47b7-998d -> ESP32 HG_2 device 
  * af66-4ec1-b57a
  * 52db-49fa-ads7
  * 3e04-4d88-9130
@@ -26,7 +26,7 @@
  * b817-488c-9b5d
  * 808e-4c62-9c4f
  */
-#define DEVICE_ID "ESP32-af6f-43b1-a20e"  // UNIQUE IDENTIFIER -> DO NOT GIVE IT TO ANY OTHER BOARD!
+#define DEVICE_ID "ESP32-db87-47b7-998d" // UNIQUE IDENTIFIER -> DO NOT GIVE IT TO ANY OTHER BOARD!
 #define SYSTEM_NAME "home"
 #define DEVICE_TYPE "light"
 #define DEFAULT_LOCATION "room"
@@ -54,16 +54,15 @@ static unsigned long MINUTE_MILLIS = 60 * SECOND_MILLIS;
 static unsigned long HOUR_MILLIS = 60 * MINUTE_MILLIS;
 static unsigned long DAY_MILLIS = 24 * HOUR_MILLIS;
 
-
 // #################################
 // #     Network / MQTT Broker     #
 // #################################
-static char WIFI_SSID[] = "@Hermes";
-static char WIFI_PASSWORD[] = "password";
-static char MQTT_BROKER_ADDRESS[] = "10.3.141.1";
+static char WIFI_SSID[] = "@Hera";
+static char WIFI_PASSWORD[] = "pa55word";
+static char MQTT_BROKER_ADDRESS[] = "10.3.151.1";
 static int MQTT_PORT = 1883;
-static char MQTT_USERNAME[] = "";  // CHANGE IT IF REQUIRED
-static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
+static char MQTT_USERNAME[] = ""; // CHANGE IT IF REQUIRED
+static char MQTT_PASSWORD[] = ""; // CHANGE IT IF REQUIRED
 
 #define QOS 2
 #define RETAIN false
@@ -72,17 +71,17 @@ static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
 #define DEBUG_MODE 1
 
 #ifdef DEBUG_MODE
-    #define DEBUG_MODE_PRINT(x)     Serial.print (x)
-    #define DEBUG_MODE_PRINTDEC(x)  Serial.print (x, DEC)
-    #define DEBUG_MODE_PRINTHEX(x)  Serial.print (x, HEX)
-    #define DEBUG_MODE_PRINTLN(x)   Serial.println (x)
-    #define DEBUG_MODE_PRINTF(...)    Serial.printf (__VA_ARGS__)
+#define DEBUG_MODE_PRINT(x) Serial.print(x)
+#define DEBUG_MODE_PRINTDEC(x) Serial.print(x, DEC)
+#define DEBUG_MODE_PRINTHEX(x) Serial.print(x, HEX)
+#define DEBUG_MODE_PRINTLN(x) Serial.println(x)
+#define DEBUG_MODE_PRINTF(...) Serial.printf(__VA_ARGS__)
 #else
-    #define DEBUG_MODE_PRINT(x)
-    #define DEBUG_MODE_PRINTDEC(x)
-    #define DEBUG_MODE_PRINTHEX(x)
-    #define DEBUG_MODE_PRINTLN(x)
-    #define DEBUG_MODE_PRINTF(...)
+#define DEBUG_MODE_PRINT(x)
+#define DEBUG_MODE_PRINTDEC(x)
+#define DEBUG_MODE_PRINTHEX(x)
+#define DEBUG_MODE_PRINTLN(x)
+#define DEBUG_MODE_PRINTF(...)
 #endif
 
 // Standard MQTT topics that this device should publish/subscribe to
@@ -106,4 +105,4 @@ static char MQTT_PASSWORD[] = "";  // CHANGE IT IF REQUIRED
 #define TEMPERATURE_SENSOR "temperatureSensor"
 #define CONSUMPTION_SENSOR "consumptionSensor"
 
-#endif //ENVIRONMENT_H
+#endif // ENVIRONMENT_H
